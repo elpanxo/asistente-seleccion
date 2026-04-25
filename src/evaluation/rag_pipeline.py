@@ -3,22 +3,23 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
  
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_chroma import Chroma
 from langchain_core.output_parsers import StrOutputParser
  
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from config import EVALUATION_CRITERIA, LLM_MODEL, LLM_TEMPERATURE, OPENAI_API_KEY
+from config import EVALUATION_CRITERIA, LLM_MODEL, LLM_TEMPERATURE, GOOGLE_API_KEY
 from src.ethics.audit import log_event, safe_parse_json
 from src.evaluation.prompts import EXTRACTION_PROMPT, QA_PROMPT, RANKING_PROMPT, SCORING_PROMPT
 from src.rag.vectorstore import filter_by_candidate, get_retriever
  
  
-def _get_llm() -> ChatOpenAI:
-    return ChatOpenAI(
+def _get_llm() -> ChatGoogleGenerativeAI:
+    return ChatGoogleGenerativeAI(
         model=LLM_MODEL,
         temperature=LLM_TEMPERATURE,
-        openai_api_key=OPENAI_API_KEY,
+        google_api_key=GOOGLE_API_KEY,
+        convert_system_messages_to_human=True;
     )
  
  

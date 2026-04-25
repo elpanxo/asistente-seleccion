@@ -4,21 +4,21 @@ from typing import List, Optional
  
 from langchain_core.documents import Document
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
  
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import (
     CHROMA_COLLECTION,
     CHROMA_PERSIST_DIR,
     EMBEDDING_MODEL,
-    OPENAI_API_KEY,
+    GOOGLE_API_KEY,
 )
  
  
-def _get_embeddings() -> OpenAIEmbeddings:
-    return OpenAIEmbeddings(
+def _get_embeddings() -> GoogleGenerativeAIEmbeddings:
+    return GoogleGenerativeAIEmbeddings(
         model=EMBEDDING_MODEL,
-        openai_api_key=OPENAI_API_KEY,
+        google_api_key=GOOGLE_API_KEY,
     )
  
  

@@ -16,7 +16,7 @@ for d in [CVS_DIR, EVALUACIONES_DIR, DOCS_DIR]:
     d.mkdir(parents=True, exist_ok=True)
 
 # LLM
-OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
 LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4o-mini")
 LLM_TEMPERATURE: float = 0.0
 
@@ -25,7 +25,7 @@ CHROMA_PERSIST_DIR: str = str(BASE_DIR / "chroma_db")
 CHROMA_COLLECTION: str = "candidatos"
 
 # Embeddings
-EMBEDDING_MODEL: str = "text-embedding-3-small"
+EMBEDDING_MODEL: str = "models/embeddings-001"
 
 # Chunking
 CHUNK_SIZE: int = 800
