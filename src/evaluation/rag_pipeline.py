@@ -19,7 +19,7 @@ def _get_llm() -> ChatGoogleGenerativeAI:
         model=LLM_MODEL,
         temperature=LLM_TEMPERATURE,
         google_api_key=GOOGLE_API_KEY,
-        convert_system_messages_to_human=True;
+        convert_system_messages_to_human=True,
     )
  
  
