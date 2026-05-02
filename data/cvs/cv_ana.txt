@@ -1,5 +1,0 @@
-Nombre: Ana Pérez
-Email: ana.perez@email.com
-Experiencia: 5 años en Python
-Habilidades: Python, FastAPI, SQL, Docker
-Proyectos: API de pagos con FastAPI

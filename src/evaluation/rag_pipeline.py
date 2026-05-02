@@ -1,29 +1,56 @@
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Dict, List, Optional
  
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain_chroma import Chroma
 from langchain_core.output_parsers import StrOutputParser
- 
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from config import EVALUATION_CRITERIA, LLM_MODEL, LLM_TEMPERATURE, GOOGLE_API_KEY
+from config import (
+    EVALUATION_CRITERIA,
+    GITHUB_TOKEN,
+    GITHUB_ENDPOINT,
+    LLM_MODEL,
+    LLM_TEMPERATURE,
+)
 from src.ethics.audit import log_event, safe_parse_json
 from src.evaluation.prompts import EXTRACTION_PROMPT, QA_PROMPT, RANKING_PROMPT, SCORING_PROMPT
 from src.rag.vectorstore import filter_by_candidate, get_retriever
  
  
-def _get_llm() -> ChatGoogleGenerativeAI:
-    return ChatGoogleGenerativeAI(
+def _get_llm() -> ChatOpenAI:
+    """
+    GitHub Models es compatible con el SDK de OpenAI.
+    Solo cambia el base_url y la api_key (que es tu GitHub token).
+    """
+    return ChatOpenAI(
         model=LLM_MODEL,
         temperature=LLM_TEMPERATURE,
-        google_api_key=GOOGLE_API_KEY,
-        convert_system_messages_to_human=True,
+        api_key=GITHUB_TOKEN,
+        base_url=GITHUB_ENDPOINT,
     )
  
  
-# 1. Extracción de perfil 
+def _safe_invoke(chain, inputs: dict, retries: int = 3) -> str:
+    """Invoca el chain con reintentos automáticos ante rate limit."""
+    for attempt in range(retries):
+        try:
+            return chain.invoke(inputs)
+        except Exception as e:
+            err = str(e).lower()
+            if "429" in str(e) or "rate" in err or "quota" in err:
+                wait = 10 * (attempt + 1)
+                print(f"[pipeline] Rate limit. Esperando {wait}s (intento {attempt+1}/{retries})...")
+                time.sleep(wait)
+            else:
+                raise
+    raise RuntimeError("Se agotaron los reintentos por rate limit.")
+ 
+ 
+# ── 1. Extracción de perfil ───────────────────────────────────────────────────
  
 def extract_candidate_profile(vectorstore: Chroma, candidate_id: str) -> Dict:
     """Recupera info del candidato desde ChromaDB y extrae perfil estructurado."""
@@ -40,7 +67,7 @@ def extract_candidate_profile(vectorstore: Chroma, candidate_id: str) -> Dict:
     ])
  
     chain = EXTRACTION_PROMPT | _get_llm() | StrOutputParser()
-    raw = chain.invoke({"context": context, "candidate_id": candidate_id})
+    raw = _safe_invoke(chain, {"context": context, "candidate_id": candidate_id})
     profile = safe_parse_json(raw)
  
     log_event("profile_extraction", {
@@ -51,7 +78,7 @@ def extract_candidate_profile(vectorstore: Chroma, candidate_id: str) -> Dict:
     return profile
  
  
-# 2. Evaluación individual
+# ── 2. Evaluación individual ──────────────────────────────────────────────────
  
 def evaluate_candidate(
     vectorstore: Chroma,
@@ -74,7 +101,7 @@ def evaluate_candidate(
     ]) or "No se encontró información de fuentes externas."
  
     chain = SCORING_PROMPT | _get_llm() | StrOutputParser()
-    raw = chain.invoke({
+    raw = _safe_invoke(chain, {
         "candidate_id": candidate_id,
         "job_title": job_title,
         "candidate_profile": json.dumps(profile, ensure_ascii=False, indent=2),
@@ -101,7 +128,7 @@ def evaluate_candidate(
     return evaluation
  
  
-# 3. Ranking comparativo
+# ── 3. Ranking comparativo ────────────────────────────────────────────────────
  
 def rank_candidates(
     vectorstore: Chroma,
@@ -114,9 +141,10 @@ def rank_candidates(
     for cid in candidate_ids:
         ev = evaluate_candidate(vectorstore, cid, job_title, job_description)
         evaluations.append(ev)
+        time.sleep(2)  # Pausa preventiva entre candidatos
  
     chain = RANKING_PROMPT | _get_llm() | StrOutputParser()
-    raw = chain.invoke({
+    raw = _safe_invoke(chain, {
         "job_title": job_title,
         "evaluations_json": json.dumps(evaluations, ensure_ascii=False, indent=2),
     })
@@ -131,7 +159,7 @@ def rank_candidates(
     return {"ranking": ranking, "evaluaciones_detalladas": evaluations}
  
  
-# 4. Q&A libre
+# ── 4. Q&A libre ─────────────────────────────────────────────────────────────
  
 def query_candidates(
     vectorstore: Chroma,
@@ -153,7 +181,7 @@ def query_candidates(
     ])
  
     chain = QA_PROMPT | _get_llm() | StrOutputParser()
-    answer = chain.invoke({"context": context, "question": question})
+    answer = _safe_invoke(chain, {"context": context, "question": question})
  
     log_event("qa_query", {
         "question": question,

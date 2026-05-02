@@ -4,27 +4,33 @@ from typing import List, Optional
  
 from langchain_core.documents import Document
 from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
  
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import (
     CHROMA_COLLECTION,
     CHROMA_PERSIST_DIR,
     EMBEDDING_MODEL,
-    GOOGLE_API_KEY,
 )
  
  
-def _get_embeddings() -> GoogleGenerativeAIEmbeddings:
-    return GoogleGenerativeAIEmbeddings(
-        model=EMBEDDING_MODEL,
-        google_api_key=GOOGLE_API_KEY,
+def _get_embeddings() -> HuggingFaceEmbeddings:
+    """
+    Embeddings locales con sentence-transformers.
+    El modelo se descarga automáticamente la primera vez (~90 MB).
+    No requiere API key ni conexión después de la descarga inicial.
+    """
+    return HuggingFaceEmbeddings(
+        model_name=EMBEDDING_MODEL,
+        model_kwargs={"device": "cpu"},
+        encode_kwargs={"normalize_embeddings": True},
     )
  
  
 def build_vectorstore(chunks: List[Document]) -> Chroma:
     """Crea o reconstruye el vectorstore desde una lista de chunks."""
-    print(f"[vectorstore] Generando embeddings para {len(chunks)} chunks...")
+    print(f"[vectorstore] Generando embeddings locales para {len(chunks)} chunks...")
+    print("[vectorstore] Primera vez: descargando modelo (~90MB)...")
     vectorstore = Chroma.from_documents(
         documents=chunks,
         embedding=_get_embeddings(),
@@ -52,7 +58,7 @@ def load_vectorstore() -> Optional[Chroma]:
 def add_documents(vectorstore: Chroma, chunks: List[Document]) -> None:
     """Agrega nuevos chunks a un vectorstore existente sin reconstruirlo."""
     vectorstore.add_documents(chunks)
-    print(f"[vectorstore] ✓ {len(chunks)} chunks agregados al vectorstore")
+    print(f"[vectorstore] ✓ {len(chunks)} chunks agregados")
  
  
 def get_retriever(vectorstore: Chroma, k: int = 6):
@@ -78,10 +84,7 @@ def filter_by_candidate(
  
  
 def get_all_candidate_ids(vectorstore: Chroma) -> List[str]:
-    """
-    Retorna la lista de candidate_ids únicos indexados en ChromaDB.
-    Útil para saber qué candidatos están disponibles sin leer el disco.
-    """
+    """Retorna la lista de candidate_ids únicos indexados en ChromaDB."""
     try:
         collection = vectorstore._collection
         results = collection.get(include=["metadatas"])
