@@ -1,0 +1,60 @@
+REGISTRO DE ENTREVISTA TÉCNICA
+================================================================================
+Candidato:      Roberto Sánchez Pérez
+Cargo:          Desarrollador Backend Senior
+Fecha:          2025-03-12
+Entrevistador:  Carlos Mendoza (Tech Lead)
+Duración:       60 minutos
+================================================================================
+
+SECCIÓN 1 — EVALUACIÓN TÉCNICA
+--------------------------------------------------------------------------------
+Ejercicio propuesto: Diseñar un sistema de rate limiting distribuido para una
+API con 10.000 usuarios concurrentes.
+
+Desempeño:
+  El candidato propuso una solución válida con una tabla en base de datos
+  para contar requests, sin considerar el cuello de botella que esto generaría
+  a escala. Cuando se le señaló el problema de rendimiento, tuvo dificultades
+  para proponer una alternativa. Mencionó Redis pero no supo cómo aplicarlo
+  al problema específico.
+
+  Resolvió el ejercicio con orientación parcial del entrevistador.
+
+Puntuación técnica: 5.0 / 10
+Observación: El nivel técnico actual corresponde más a un perfil Junior-Mid
+que Senior. Conoce los conceptos básicos pero le falta profundidad en sistemas
+distribuidos y arquitecturas a escala.
+
+SECCIÓN 2 — COMUNICACIÓN Y LIDERAZGO
+--------------------------------------------------------------------------------
+  Comunicación adecuada, respuestas directas pero poco desarrolladas.
+  Tendencia a responder lo mínimo sin elaborar. Cuando se le pidió que
+  explicara decisiones de diseño, le costó articular el razonamiento.
+
+  No mencionó experiencia liderando equipos ni mentoreando a otros.
+
+SECCIÓN 3 — CULTURA Y FIT DE EQUIPO
+--------------------------------------------------------------------------------
+  Actitud positiva y colaborativa. Parece ser una persona con buena disposición
+  para el trabajo en equipo. No hizo preguntas sobre el equipo o la cultura.
+
+  Sin señales de alerta en actitud o comportamiento.
+
+SECCIÓN 4 — EXPECTATIVAS
+--------------------------------------------------------------------------------
+  Renta esperada: $1.600.000 CLP líquidos
+  Disponibilidad: Inmediata
+  Modalidad:      Cualquiera (presencial, híbrido o remoto)
+
+================================================================================
+RECOMENDACIÓN FINAL
+================================================================================
+⏳ EN ESPERA — No recomendado para el cargo Senior en este momento
+
+El candidato muestra potencial y buena actitud, pero el nivel técnico actual
+no alcanza los requisitos del cargo Senior. Podría ser considerado para una
+posición Mid en el futuro si profundiza en sistemas distribuidos y cloud.
+
+Entrevistador: Carlos Mendoza
+Firma digital:  cmendoza@empresa.cl — 2025-03-12

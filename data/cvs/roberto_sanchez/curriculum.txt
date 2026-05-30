@@ -1,0 +1,70 @@
+CURRÍCULUM VITAE
+================================================================================
+
+INFORMACIÓN PERSONAL
+--------------------------------------------------------------------------------
+Nombre:     Roberto Sánchez Pérez
+Correo:     roberto.sanchez@gmail.com
+GitHub:     github.com/rsanchez-dev
+Ubicación:  Valparaíso, Chile
+
+================================================================================
+RESUMEN PROFESIONAL
+--------------------------------------------------------------------------------
+Desarrollador Python con 3 años de experiencia en consultoría digital y
+proyectos freelance. Manejo de APIs REST, bases de datos relacionales y
+scripting de automatización. En proceso de profundizar conocimientos en
+arquitecturas cloud y contenedores. Proactivo, puntual y con buena disposición
+para el trabajo en equipo.
+
+================================================================================
+EXPERIENCIA LABORAL
+--------------------------------------------------------------------------------
+
+2022 – 2025 | Consultora Digital Ltda. — Desarrollador Python
+  • Desarrollo y mantenimiento de scripts de automatización para clientes
+    del sector financiero (bancos y aseguradoras).
+  • Mantenimiento de APIs legacy en Flask con integración a sistemas SAP.
+  • Creación de reportes automatizados con pandas y openpyxl.
+  • Soporte técnico y resolución de incidencias en producción.
+  • Participación en reuniones con clientes para levantamiento de requerimientos.
+
+2020 – 2022 | Freelance — Desarrollador Web
+  • Desarrollo de sitios web para pequeñas empresas usando WordPress y PHP.
+  • Integración de formularios de contacto y pasarelas de pago básicas.
+  • Proyectos para clientes de retail, gastronomía y servicios profesionales.
+
+================================================================================
+EDUCACIÓN
+--------------------------------------------------------------------------------
+2017 – 2020 | Técnico en Programación y Análisis de Sistemas
+              INACAP Valparaíso
+              Promedio: 5.8 / 7.0
+
+2023        | Python para Data Science — Coursera (Google)
+2024        | Introducción a Docker — Udemy
+
+================================================================================
+HABILIDADES TÉCNICAS
+--------------------------------------------------------------------------------
+Lenguajes:     Python, PHP, SQL, HTML/CSS
+Frameworks:    Flask, WordPress
+Bases de datos: MySQL, SQLite
+Herramientas:  Git, Postman, Excel/pandas, Linux básico
+En aprendizaje: Docker, FastAPI, PostgreSQL
+
+================================================================================
+PROYECTOS DESTACADOS
+--------------------------------------------------------------------------------
+• flask-crud-api (GitHub, 12 ⭐)
+  API REST básica en Flask con operaciones CRUD y autenticación JWT.
+
+• Sistema de facturación (Consultora Digital)
+  Script de automatización para generación de facturas PDF desde Excel.
+  Ahorro estimado de 6 horas semanales de trabajo manual.
+
+================================================================================
+IDIOMAS
+--------------------------------------------------------------------------------
+Español: Nativo
+Inglés:  B1 — Lectura técnica sin dificultad, conversación básica

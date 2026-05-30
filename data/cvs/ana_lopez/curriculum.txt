@@ -1,0 +1,46 @@
+PERFIL LINKEDIN — Ana López Martínez
+================================================================================
+URL:          linkedin.com/in/analopez-dev
+Conexiones:   500+
+Seguidores:   1.240
+
+TITULAR
+Ingeniera Backend Senior | Python · FastAPI · Kubernetes | Mentora en Mujeres en Tech
+
+SOBRE MÍ
+Ingeniera con 6 años construyendo sistemas backend que escalan. Me apasiona
+la arquitectura limpia, los equipos diversos y enseñar lo que sé. Actualmente
+en TechCorp, liderando la plataforma de pagos digitales.
+
+RECOMENDACIONES RECIBIDAS (7 recomendaciones)
+  1. "Ana es la ingeniera más completa con la que he trabajado. No solo escribe
+     código excelente, sino que levanta a todo el equipo."
+     — Diego Herrera, CTO de TechCorp
+
+  2. "Gracias a su mentoría pasé de tener miedo al código a convertirme en
+     desarrolladora en 8 meses. Es una referente."
+     — Valentina Ríos, Dev Junior (mentorada)
+
+  3. "Su migración a microservicios fue impecable. Cero downtime, dentro del
+     presupuesto y con documentación ejemplar."
+     — Patricia Soto, Product Manager
+
+ACTIVIDAD RECIENTE
+  • Publicación: "5 errores comunes al migrar a microservicios (y cómo evitarlos)"
+    → 4.200 vistas · 180 reacciones · 43 comentarios
+
+  • Publicación: "Por qué el pair programming me hizo mejor ingeniera"
+    → 2.800 vistas · 210 reacciones
+
+  • Ponencia compartida: PyCon Chile 2023 — "FastAPI en producción: lecciones aprendidas"
+    → 1.100 vistas
+
+VOLUNTARIADO
+  Mentora — Mujeres en Tech Chile (2022 – presente)
+  "Apoyo a mujeres en transición hacia carreras tech, especialmente en backend
+  y arquitectura de sistemas."
+
+CURSOS Y CERTIFICACIONES
+  • AWS Certified Solutions Architect – Associate (2023)
+  • Kubernetes Administrator CKA (2022)
+  • Python Clean Code — refactoring y patrones (2021)

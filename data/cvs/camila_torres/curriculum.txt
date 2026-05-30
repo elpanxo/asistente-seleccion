@@ -1,0 +1,101 @@
+CURRÍCULUM VITAE
+================================================================================
+
+INFORMACIÓN PERSONAL
+--------------------------------------------------------------------------------
+Nombre:     Camila Torres Rojas
+Correo:     camila.torres@email.com
+LinkedIn:   linkedin.com/in/camilatorres-eng
+GitHub:     github.com/camilatorres
+Ubicación:  Concepción, Chile (disponible para trabajo remoto)
+
+================================================================================
+RESUMEN PROFESIONAL
+--------------------------------------------------------------------------------
+Ingeniera de Software con 5 años de experiencia, especializada en backend
+distribuido y plataformas de datos en tiempo real. Ha trabajado en equipos
+internacionales en Chile, Colombia y España. Comprometida con la diversidad
+en tecnología: cofundadora de una comunidad de programadoras en la región
+del Biobío. Combina sólidas habilidades técnicas con capacidad de liderazgo
+y comunicación efectiva con stakeholders no técnicos.
+
+================================================================================
+EXPERIENCIA LABORAL
+--------------------------------------------------------------------------------
+
+2022 – 2025 | DataStream Co. (remoto, empresa española) — Backend Engineer
+  • Diseño e implementación de pipelines de datos en tiempo real con
+    Apache Kafka y Python, procesando 2 millones de eventos por hora.
+  • Desarrollo de microservicios con FastAPI deployados en GCP (Cloud Run).
+  • Reducción del 55% en costos de infraestructura mediante optimización
+    de consultas y rediseño del modelo de datos en BigQuery.
+  • Liderazgo técnico del equipo de backend (5 personas, 3 países distintos).
+  • Implementación de prácticas MLOps para modelos de predicción de demanda.
+
+2020 – 2022 | BancoDigital S.A. — Desarrolladora Backend
+  • Desarrollo de APIs para el módulo de transferencias internacionales,
+    cumpliendo normativas SWIFT y regulaciones del Banco Central de Chile.
+  • Implementación de sistema de detección de fraude con reglas de negocio
+    en Python, reduciendo transacciones fraudulentas en un 28%.
+  • Refactorización de código legacy en Java a Python/FastAPI.
+  • Documentación técnica de APIs con OpenAPI/Swagger.
+
+2019 – 2020 | Agencia Digital NovaTech — Desarrolladora Junior
+  • Desarrollo de funcionalidades backend en Django para clientes del sector
+    educacional y salud.
+  • Primer contacto con testing automatizado (pytest) y metodologías ágiles.
+
+================================================================================
+EDUCACIÓN
+--------------------------------------------------------------------------------
+2014 – 2019 | Ingeniería Civil Informática
+              Universidad de Concepción
+              Titulada con distinción — Promedio: 6.0 / 7.0
+
+2021        | Google Cloud Professional Data Engineer
+              Google Cloud
+
+2023        | Machine Learning Engineering for Production (MLOps)
+              Coursera — DeepLearning.AI
+
+================================================================================
+HABILIDADES TÉCNICAS
+--------------------------------------------------------------------------------
+Lenguajes:       Python, Java, SQL, Bash
+Frameworks:      FastAPI, Django, Kafka, Spark
+Cloud:           GCP (Cloud Run, BigQuery, Pub/Sub), AWS básico
+Infraestructura: Docker, Kubernetes, Terraform, CI/CD
+Bases de datos:  PostgreSQL, BigQuery, Redis, Cassandra
+ML/Data:         pandas, scikit-learn, MLflow, dbt
+Herramientas:    Git, Jira, Notion, Grafana, OpenAPI
+
+================================================================================
+PROYECTOS DESTACADOS
+--------------------------------------------------------------------------------
+• kafka-python-starter (GitHub, 210 ⭐)
+  Kit de inicio para pipelines de eventos con Kafka y Python.
+  Referenciado en la documentación oficial de Confluent.
+
+• Plataforma de monitoreo de calidad del agua (proyecto social)
+  Sistema de alertas en tiempo real para comunidades rurales del Biobío.
+  Desarrollado de forma voluntaria con equipo de la U. de Concepción.
+  Presentado en conferencia de tecnología y medio ambiente (2024).
+
+• Sistema antifraude BancoDigital
+  Reducción del 28% en fraudes en primer año de operación.
+
+================================================================================
+IDIOMAS
+--------------------------------------------------------------------------------
+Español:  Nativo
+Inglés:   C1 — Avanzado (trabajo diario con equipo europeo)
+Francés:  A2 — Básico
+
+================================================================================
+DIVERSIDAD E INCLUSIÓN
+--------------------------------------------------------------------------------
+• Cofundadora de "CodHer Biobío" — comunidad de programadoras (2021–presente)
+  Más de 200 miembros activas, talleres mensuales gratuitos.
+• Mentora en programa "Talentos Digitales" del SENCE — 2022 y 2023
+• Ponente en Women Techmakers Chile 2023 y 2024
+• Jurado en hackathon universitario con enfoque en soluciones sociales (2024)
