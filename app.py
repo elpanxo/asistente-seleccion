@@ -129,6 +129,10 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stFileUploader"] {
     background: #262626 !important; border: 1px dashed #3a3a3a !important; border-radius: 10px !important;
 }
+/* Ocultar texto duplicado del botón upload */
+[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"] span { display: none !important; }
+[data-testid="stFileUploader"] small { display: none !important; }
+[data-testid="stFileUploader"] [data-testid="baseButton-secondary"] span { display: none !important; }
 
 [data-testid="stChatInput"] {
     background: #2a2a2a !important; border: 1px solid #333 !important; border-radius: 12px !important;
@@ -170,8 +174,23 @@ h1, h2, h3 { font-family: 'Sora', sans-serif !important; font-weight: 600 !impor
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 
 #MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] { display: none !important; }
-.block-container { padding-top: 1.5rem !important; max-width: 100% !important; }
+[data-testid="stHeader"] { display: none !important; }
+.block-container { padding-top: 0.5rem !important; max-width: 100% !important; }
+/* Botón para colapsar/expandir sidebar siempre visible */
+[data-testid="stSidebarCollapseButton"] { display: flex !important; }
+section[data-testid="stSidebarCollapsedControl"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
 </style>
+<script>
+// Forzar sidebar expandido al cargar
+window.addEventListener("load", function() {
+    const btn = document.querySelector("[data-testid=\"stSidebarCollapseButton\"]");
+    if (btn) btn.style.display = "flex";
+});
+</script>
 """, unsafe_allow_html=True)
 
 
@@ -235,47 +254,52 @@ with st.sidebar:
     st.markdown('<div class="sidebar-section-title">Cargo</div>', unsafe_allow_html=True)
     st.session_state.job_title = st.text_input(
         "Cargo", value=st.session_state.job_title,
-        label_visibility="collapsed", placeholder="Nombre del cargo"
+        label_visibility="collapsed", placeholder="Nombre del cargo", key="sb_job_title"
     )
     st.session_state.job_description = st.text_area(
         "Descripción", value=st.session_state.job_description,
-        label_visibility="collapsed", height=90, placeholder="Descripción del cargo..."
+        label_visibility="collapsed", height=90, placeholder="Descripción del cargo...", key="sb_job_desc"
     )
 
     st.markdown('<div class="sidebar-section-title">Subir Documento</div>', unsafe_allow_html=True)
-    candidate_name = st.text_input("ID", placeholder="ej: ana_lopez", label_visibility="collapsed")
+    candidate_name = st.text_input("ID", placeholder="ej: ana_lopez", label_visibility="collapsed", key="sb_candidate_id")
     source_type = st.selectbox(
         "Tipo", ["curriculum", "feedback_entrevista", "linkedin", "github", "evaluacion_previa"],
-        label_visibility="collapsed",
+        label_visibility="collapsed", key="sb_source_type"
     )
-    uploaded_file = st.file_uploader("Archivo", type=["pdf", "txt", "json", "docx"], label_visibility="collapsed")
+    uploaded_files = st.file_uploader("Archivos", type=["pdf", "txt", "json", "docx"], label_visibility="collapsed", accept_multiple_files=True, help="Sube hasta 3 archivos a la vez", key="sb_uploader")
 
-    if st.button("Subir e Indexar", use_container_width=True, type="primary"):
+    if st.button("Subir e Indexar", use_container_width=True, type="primary", key="sb_upload_btn"):
         if not candidate_name:
             st.error("Ingresa un ID de candidato.")
-        elif not uploaded_file:
+        elif not uploaded_files:
             st.error("Selecciona un archivo.")
         else:
             with st.spinner("Indexando..."):
-                ext = Path(uploaded_file.name).suffix
                 save_dir = CVS_DIR / candidate_name
                 save_dir.mkdir(parents=True, exist_ok=True)
-                save_path = save_dir / f"{source_type}{ext}"
-                with open(save_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                docs   = load_single_file(str(save_path), candidate_name, source_type)
-                chunks = split_documents(docs)
-                if chunks:
+                all_chunks = []
+                nombres = []
+                for uf in uploaded_files[:3]:
+                    ext = Path(uf.name).suffix
+                    save_path = save_dir / f"{source_type}_{uf.name}"
+                    with open(save_path, "wb") as f:
+                        f.write(uf.getbuffer())
+                    docs   = load_single_file(str(save_path), candidate_name, source_type)
+                    chunks = split_documents(docs)
+                    all_chunks.extend(chunks)
+                    nombres.append(uf.name)
+                if all_chunks:
                     vs = get_vs()
                     if vs is None:
-                        vs = build_vectorstore(chunks)
+                        vs = build_vectorstore(all_chunks)
                     else:
-                        add_documents(vs, chunks)
+                        add_documents(vs, all_chunks)
                     st.session_state.vectorstore = vs
-                    st.success("Indexado correctamente.")
+                    st.success(f"✓ {len(nombres)} archivo(s) indexado(s): {', '.join(nombres)}")
                     st.rerun()
                 else:
-                    st.error("No se pudo procesar el archivo.")
+                    st.error("No se pudo procesar ningún archivo.")
 
     vs = get_vs()
     if vs:
@@ -292,7 +316,24 @@ with st.sidebar:
 # ══════════════════════════════════════════════════════════════════════════════
 # TABS
 # ══════════════════════════════════════════════════════════════════════════════
-tab_chat, tab_eval, tab_rank, tab_audit, tab_agent = st.tabs(["Chat", "Evaluación", "Ranking", "Auditoría", "Agente EP2"])
+# Botón flotante para abrir el sidebar si está colapsado
+st.markdown("""
+<style>
+.sidebar-toggle-btn {
+    position: fixed; top: 12px; left: 12px; z-index: 999999;
+    background: #262626; border: 1px solid #10a37f;
+    border-radius: 8px; padding: 6px 10px;
+    color: #10a37f; font-size: 1rem; cursor: pointer;
+    display: none;
+}
+[data-testid="stSidebar"][aria-expanded="false"] ~ * .sidebar-toggle-btn,
+body:has([data-testid="stSidebar"][aria-expanded="false"]) .sidebar-toggle-btn {
+    display: block !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+tab_chat, tab_eval, tab_rank, tab_audit = st.tabs(["Chat", "Evaluación", "Ranking", "Auditoría"])
 
 
 # ── CHAT ─────────────────────────────────────────────────────────────────────
@@ -306,39 +347,146 @@ with tab_chat:
             <div style="font-size:0.82rem;color:#555">Sube documentos desde el panel izquierdo para comenzar.</div>
         </div>""", unsafe_allow_html=True)
     else:
+        from agent import init_agent, run_agent, get_short_memory_count, get_long_memory, clear_short_memory
+        from src.rag.vectorstore import get_all_candidate_ids
+
         ids = get_all_candidate_ids(vs)
-        col_f, col_c = st.columns([4, 1])
+        init_agent(vs, st.session_state.job_title, st.session_state.job_description)
+
+        lt = get_long_memory()
+
+        # ── Barra superior compacta ───────────────────────────────────────
+        summary = lt.get_summary()
+        col_f, col_info, col_c = st.columns([3, 4, 1])
         with col_f:
-            sel = st.selectbox("Filtrar", ["Todos los candidatos"] + ids, label_visibility="collapsed")
+            sel = st.selectbox("Filtrar", ["Todos los candidatos"] + ids,
+                               label_visibility="collapsed", key="chat_filter")
+        with col_info:
+            st.markdown(
+                f"<div style='display:flex;gap:16px;align-items:center;height:38px;padding:0 8px'>"
+                f"<span style='font-size:0.75rem;color:#555'>"
+                f"🧠 <span style='color:#888'>{summary['total_processes']}</span> proceso(s) &nbsp;·&nbsp; "
+                f"<span style='color:#888'>{summary['total_evaluations']}</span> evaluacion(es) &nbsp;·&nbsp; "
+                f"<span style='color:#888'>{get_short_memory_count()}</span> mensaje(s) en sesión"
+                f"</span></div>",
+                unsafe_allow_html=True,
+            )
         with col_c:
-            if st.button("Limpiar", type="secondary"):
+            if st.button("Limpiar", type="secondary", key="chat_clear"):
                 st.session_state.chat_history = []
+                clear_short_memory()
                 st.rerun()
 
         candidate_filter = None if sel == "Todos los candidatos" else sel
 
+        st.markdown("""
+        <style>
+        .chat-msg-user { display:flex; justify-content:flex-end; margin:12px 0; }
+        .chat-msg-user .bubble {
+            background:#2f2f2f; color:#ececec; padding:12px 18px;
+            border-radius:18px 18px 4px 18px; max-width:75%;
+            font-size:0.9rem; line-height:1.6;
+        }
+        .chat-empty { text-align:center; padding:40px 0; color:#555; }
+        .chat-empty .icon { font-size:2rem; margin-bottom:12px; color:#333; }
+        .chat-empty .title { font-size:1rem; font-weight:600; color:#777; margin-bottom:10px; }
+        </style>
+        """, unsafe_allow_html=True)
+
+        # ── Inicializar session state ─────────────────────────────────────
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
+        if "chat_pending" not in st.session_state:
+            st.session_state.chat_pending = None
+
+        # ── Pantalla vacía con sugerencias ───────────────────────────────
         if not st.session_state.chat_history:
             st.markdown("""
-            <div style="text-align:center;padding:40px 0;color:#444">
-                <div style="font-size:0.85rem;line-height:1.8">
-                    Haz una pregunta sobre los candidatos indexados.<br>
-                    <span style="color:#555;font-size:0.78rem">Ej: "¿Quién tiene más experiencia con Python?"</span>
-                </div>
+            <div style="text-align:center;padding:60px 0 24px 0;color:#555">
+                <div style="font-size:1.8rem;margin-bottom:10px;color:#333">◈</div>
+                <div style="font-size:1rem;font-weight:600;color:#777;margin-bottom:4px">¿En qué puedo ayudarte?</div>
+                <div style="font-size:0.8rem;color:#4a4a4a">Selecciona una sugerencia o escribe tu consulta</div>
             </div>""", unsafe_allow_html=True)
 
-        for msg in st.session_state.chat_history:
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+            sug1, sug2, sug3 = st.columns(3)
+            suggestions = [
+                ("sug1", "¿Quién tiene más experiencia con Python?"),
+                ("sug2", "¿Qué candidatos conocen Docker?"),
+                ("sug3", "¿Cuál es el nivel de inglés de los candidatos?"),
+            ]
+            for col, (key, text) in zip([sug1, sug2, sug3], suggestions):
+                with col:
+                    if st.button(text, key=key, use_container_width=True):
+                        st.session_state.chat_pending = text
+                        st.rerun()
 
-        if prompt := st.chat_input("Escribe tu consulta sobre los candidatos..."):
-            st.session_state.chat_history.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
-            with st.chat_message("assistant"):
-                with st.spinner(""):
-                    answer = query_candidates(vs, prompt, candidate_id=candidate_filter)
-                st.markdown(answer)
-            st.session_state.chat_history.append({"role": "assistant", "content": answer})
+        # ── Mostrar historial ─────────────────────────────────────────────
+        for msg in st.session_state.chat_history:
+            if msg["role"] == "user":
+                st.markdown(f"""
+                <div class="chat-msg-user">
+                    <div class="bubble">{msg["content"]}</div>
+                </div>""", unsafe_allow_html=True)
+            else:
+                col_av, col_txt = st.columns([0.04, 0.96])
+                with col_av:
+                    st.markdown(
+                        '<div style="width:30px;height:30px;border-radius:50%;background:#10a37f;'
+                        'display:flex;align-items:center;justify-content:center;'
+                        'font-size:13px;font-weight:700;color:#fff;margin-top:4px">R</div>',
+                        unsafe_allow_html=True)
+                with col_txt:
+                    st.markdown(msg["content"])
+                    # Mostrar plan y pasos si existen
+                    if msg.get("plan"):
+                        with st.expander("Plan de ejecución"):
+                            for k, v in msg["plan"].items():
+                                st.markdown(
+                                    f"<div style='font-size:0.78rem;padding:2px 0'>"
+                                    f"<span style='color:#555;min-width:130px;display:inline-block'>{k}</span>"
+                                    f"<span style='color:#ccc'>{v}</span></div>",
+                                    unsafe_allow_html=True)
+                    if msg.get("steps") and len(msg["steps"]) > 0:
+                        with st.expander(f"Razonamiento ReAct ({len(msg['steps'])} pasos)"):
+                            for i, step in enumerate(msg["steps"], 1):
+                                tool_name = step[0] if isinstance(step, tuple) else str(step)
+                                st.markdown(
+                                    f"<div style='font-size:0.78rem;color:#888;margin-bottom:4px'>"
+                                    f"<span style='color:#10a37f'>Paso {i}</span> · "
+                                    f"<code>{tool_name}</code></div>",
+                                    unsafe_allow_html=True)
+                    if msg.get("memory_used"):
+                        st.markdown(
+                            '<span style="font-size:0.72rem;color:#10a37f">'
+                            '🧠 Memoria de largo plazo consultada</span>',
+                            unsafe_allow_html=True)
+
+
+
+        # ── Procesar mensaje pendiente (sugerencias) o input manual ───────
+        def process_message(user_input: str):
+            st.session_state.chat_history.append({"role": "user", "content": user_input})
+            with st.spinner("El agente está razonando..."):
+                result = run_agent(user_input, ids)
+            st.session_state.chat_history.append({
+                "role":        "assistant",
+                "content":     result["output"],
+                "plan":        result.get("plan", {}),
+                "steps":       result.get("steps", []),
+                "memory_used": result.get("memory_used", False),
+            })
+
+        # Procesar sugerencia pendiente
+        if st.session_state.chat_pending:
+            pending = st.session_state.chat_pending
+            st.session_state.chat_pending = None
+            process_message(pending)
+            st.rerun()
+
+        # Input manual
+        if prompt := st.chat_input("Escribe tu consulta...", key="chat_input_main"):
+            process_message(prompt)
+            st.rerun()
 
 
 # ── EVALUACIÓN ───────────────────────────────────────────────────────────────
@@ -353,9 +501,9 @@ with tab_eval:
         else:
             col_s, col_b = st.columns([3, 1])
             with col_s:
-                selected = st.selectbox("Candidato", ids, label_visibility="collapsed")
+                selected = st.selectbox("Candidato", ids, label_visibility="collapsed", key="eval_candidate")
             with col_b:
-                run = st.button("Evaluar", type="primary", use_container_width=True)
+                run = st.button("Evaluar", type="primary", use_container_width=True, key="eval_btn")
 
             if run:
                 with st.spinner(f"Analizando {selected}..."):
@@ -443,9 +591,9 @@ with tab_rank:
         else:
             col_ms, col_rb = st.columns([3, 1])
             with col_ms:
-                sel_rank = st.multiselect("Candidatos", ids, default=ids, label_visibility="collapsed")
+                sel_rank = st.multiselect("Candidatos", ids, default=ids, label_visibility="collapsed", key="rank_select")
             with col_rb:
-                run_rank = st.button("Generar ranking", type="primary", use_container_width=True)
+                run_rank = st.button("Generar ranking", type="primary", use_container_width=True, key="rank_btn")
 
             if run_rank:
                 if len(sel_rank) < 2:
@@ -518,7 +666,7 @@ with tab_audit:
 
         col_f, col_d = st.columns([3, 1])
         with col_f:
-            ft = st.selectbox("Filtrar", ["Todos"] + list(counts.keys()), label_visibility="collapsed")
+            ft = st.selectbox("Filtrar", ["Todos"] + list(counts.keys()), label_visibility="collapsed", key="audit_filter")
         with col_d:
             st.download_button(
                 "Descargar log", use_container_width=True,
@@ -535,176 +683,3 @@ with tab_audit:
             detail = (detail[:50] + "…") if detail and len(detail) > 50 else (detail or "")
             with st.expander(f"{ts}  ·  {etype}  ·  {detail}"):
                 st.json(entry)
-
-
-# ── AGENTE EP2 ────────────────────────────────────────────────────────────────
-with tab_agent:
-    vs = get_vs()
-
-    if vs is None:
-        st.markdown("""
-        <div style="text-align:center;padding:80px 0;color:#555">
-            <div style="font-size:2rem;margin-bottom:12px">◈</div>
-            <div style="font-size:0.85rem;color:#666">Sube documentos primero para activar el agente.</div>
-        </div>""", unsafe_allow_html=True)
-    else:
-        from agent import init_agent, run_agent, get_short_memory, get_long_memory, clear_short_memory
-        from src.rag.vectorstore import get_all_candidate_ids
-
-        # Inicializar agente con contexto actual
-        init_agent(vs, st.session_state.job_title, st.session_state.job_description)
-        available_ids = get_all_candidate_ids(vs)
-
-        st.markdown(
-            "<div style='font-size:0.7rem;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px'>"
-            "Agente funcional con memoria y planificación — EP2</div>",
-            unsafe_allow_html=True,
-        )
-
-        # ── Memoria de largo plazo ────────────────────────────────────────
-        lt = get_long_memory()
-        summary = lt.get_summary()
-
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.metric("Procesos en memoria", summary["total_processes"])
-        with c2:
-            st.metric("Evaluaciones guardadas", summary["total_evaluations"])
-        with c3:
-            st.metric("Mensajes sesión actual", get_short_memory().message_count)
-
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-
-        # ── Panel de herramientas disponibles ─────────────────────────────
-        with st.expander("Herramientas del agente"):
-            tools_info = [
-                ("buscar_candidatos",  "Consulta",            "Búsqueda semántica RAG sobre documentos indexados"),
-                ("evaluar_candidato",  "Razonamiento",        "Genera evaluación ponderada con chain-of-thought"),
-                ("rankear_candidatos", "Escritura",           "Ranking comparativo con análisis de diversidad"),
-                ("consultar_historial","Memoria largo plazo", "Recupera evaluaciones previas del candidato"),
-                ("resumen_proceso",    "Escritura",           "Resumen del estado actual del proceso de selección"),
-            ]
-            for name, tipo, desc in tools_info:
-                st.markdown(
-                    f"<div style='display:flex;gap:12px;padding:6px 0;border-bottom:1px solid #2a2a2a'>"
-                    f"<code style='color:#10a37f;min-width:180px'>{name}</code>"
-                    f"<span style='color:#666;min-width:120px;font-size:0.8rem'>{tipo}</span>"
-                    f"<span style='color:#aaa;font-size:0.8rem'>{desc}</span></div>",
-                    unsafe_allow_html=True,
-                )
-
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-
-        # ── Historial del chat del agente ─────────────────────────────────
-        if "agent_history" not in st.session_state:
-            st.session_state.agent_history = []
-
-        if not st.session_state.agent_history:
-            st.markdown("""
-            <div style="text-align:center;padding:30px 0;color:#444;font-size:0.83rem;line-height:1.8">
-                El agente puede razonar, planificar y usar múltiples herramientas.<br>
-                <span style="color:#555;font-size:0.78rem">
-                Ej: "Evalúa a ana_lopez y dime si ya fue evaluada antes"<br>
-                "Rankea todos los candidatos y dame un resumen del proceso"
-                </span>
-            </div>""", unsafe_allow_html=True)
-
-        for msg in st.session_state.agent_history:
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
-                if msg.get("plan"):
-                    with st.expander("Plan de ejecución del agente"):
-                        for k, v in msg["plan"].items():
-                            st.markdown(
-                                f"<div style='font-size:0.8rem;padding:3px 0'>"
-                                f"<span style='color:#555;min-width:140px;display:inline-block'>{k}</span>"
-                                f"<span style='color:#ccc'>{v}</span></div>",
-                                unsafe_allow_html=True,
-                            )
-                if msg.get("steps"):
-                    with st.expander(f"Razonamiento ReAct ({len(msg['steps'])} pasos)"):
-                        for i, (action, observation) in enumerate(msg["steps"], 1):
-                            st.markdown(
-                                f"<div style='font-size:0.78rem;color:#888;margin-bottom:4px'>"
-                                f"<span style='color:#10a37f'>Paso {i}</span> · "
-                                f"Herramienta: <code>{action.tool}</code></div>",
-                                unsafe_allow_html=True,
-                            )
-
-        # ── Input del agente ──────────────────────────────────────────────
-        col_input, col_clear = st.columns([4, 1])
-        with col_clear:
-            if st.button("Limpiar", type="secondary", key="clear_agent"):
-                st.session_state.agent_history = []
-                clear_short_memory()
-                st.rerun()
-
-        if prompt := st.chat_input("Escribe tu consulta al agente...", key="agent_input"):
-            st.session_state.agent_history.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
-
-            with st.chat_message("assistant"):
-                with st.spinner("El agente está razonando..."):
-                    result = run_agent(prompt, available_ids)
-
-                st.markdown(result["output"])
-
-                # Mostrar plan del planificador
-                with st.expander("Plan de ejecución del agente"):
-                    for k, v in result["plan"].items():
-                        st.markdown(
-                            f"<div style='font-size:0.8rem;padding:3px 0'>"
-                            f"<span style='color:#555;min-width:140px;display:inline-block'>{k}</span>"
-                            f"<span style='color:#ccc'>{v}</span></div>",
-                            unsafe_allow_html=True,
-                        )
-
-                # Mostrar pasos de razonamiento ReAct
-                if result["steps"]:
-                    with st.expander(f"Razonamiento ReAct ({len(result['steps'])} pasos)"):
-                        for i, (action, observation) in enumerate(result["steps"], 1):
-                            st.markdown(
-                                f"<div style='font-size:0.78rem;color:#888;margin-bottom:4px'>"
-                                f"<span style='color:#10a37f'>Paso {i}</span> · "
-                                f"Herramienta: <code>{action.tool}</code></div>",
-                                unsafe_allow_html=True,
-                            )
-
-                if result["memory_used"]:
-                    st.markdown(
-                        '<div style="font-size:0.75rem;color:#10a37f;margin-top:8px">'
-                        '🧠 Memoria de largo plazo consultada en esta respuesta</div>',
-                        unsafe_allow_html=True,
-                    )
-
-            st.session_state.agent_history.append({
-                "role":    "assistant",
-                "content": result["output"],
-                "plan":    result["plan"],
-                "steps":   result["steps"],
-            })
-
-        # ── Memoria de largo plazo del proceso ────────────────────────────
-        process_data = lt.get_process(st.session_state.job_title)
-        if process_data and process_data["decisions"]:
-            st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-            st.markdown(
-                "<div style='font-size:0.7rem;color:#555;text-transform:uppercase;"
-                "letter-spacing:0.08em;margin-bottom:8px'>Memoria de largo plazo — Proceso actual</div>",
-                unsafe_allow_html=True,
-            )
-            top = lt.get_top_candidates(st.session_state.job_title)
-            for d in top:
-                sc = {"avanzar": "#10a37f", "en_espera": "#f59e0b", "descartar": "#ef4444"}
-                color = sc.get(d.get("recommendation", ""), "#888")
-                st.markdown(
-                    f"<div style='background:#262626;border:1px solid #2f2f2f;border-radius:8px;"
-                    f"padding:10px 14px;margin-bottom:6px;display:flex;gap:12px;align-items:center'>"
-                    f"<span style='color:#ccc;font-weight:500;flex:1'>{d['candidate_id']}</span>"
-                    f"<span style='font-family:monospace;color:{color}'>{d.get('score',0):.1f}</span>"
-                    f"<span style='color:{color};font-size:0.75rem'>{d.get('recommendation','')}</span>"
-                    f"<span style='color:#555;font-size:0.72rem'>{d.get('date','')[:10]}</span>"
-                    f"</div>",
-                    unsafe_allow_html=True,
-                )

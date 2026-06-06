@@ -1,0 +1,66 @@
+REGISTRO DE ENTREVISTA TÉCNICA
+================================================================================
+Candidata:      Camila Torres Rojas
+Cargo:          Desarrolladora Backend Senior
+Fecha:          2025-03-14
+Entrevistador:  Carlos Mendoza (Tech Lead)
+Duración:       80 minutos
+================================================================================
+
+SECCIÓN 1 — EVALUACIÓN TÉCNICA
+--------------------------------------------------------------------------------
+Ejercicio propuesto: Diseñar un sistema de rate limiting distribuido para una
+API con 10.000 usuarios concurrentes.
+
+Desempeño:
+  La candidata llegó directamente a una solución con Redis y el algoritmo
+  Sliding Window Log, justificando por qué lo prefería sobre Token Bucket
+  para este caso específico. Luego extendió espontáneamente el diseño para
+  manejar múltiples regiones geográficas con replicación eventual.
+
+  Adicionalmente propuso una estrategia de observabilidad con métricas en
+  Grafana para monitorear el comportamiento del rate limiter en producción,
+  algo que ningún otro candidato mencionó.
+
+Puntuación técnica: 9.5 / 10
+Observación: Nivel técnico excepcional. Piensa en sistemas completos, no
+solo en el código. La extensión a multi-región fue particularmente impresionante.
+
+SECCIÓN 2 — COMUNICACIÓN Y LIDERAZGO
+--------------------------------------------------------------------------------
+  Excelente. Comunicación muy clara y estructurada. Lideró la conversación
+  de forma natural, haciendo preguntas para clarificar el alcance del
+  problema antes de proponer soluciones (ingeniería real).
+
+  Compartió experiencia liderando equipo multicultural de 5 personas.
+  Describió cómo manejó un conflicto técnico entre miembros del equipo
+  con distintas culturas de trabajo (Chile y España). Respuesta madura y empática.
+
+SECCIÓN 3 — CULTURA Y FIT DE EQUIPO
+--------------------------------------------------------------------------------
+  Muy positivo. Hizo las mejores preguntas del proceso: sobre estrategia
+  técnica a largo plazo, sobre diversidad en el equipo actual, y sobre cómo
+  la empresa apoya el crecimiento profesional de sus ingenieras.
+
+  Mencionó que valora ambientes donde la diversidad sea real y no solo
+  declarativa. Fit cultural muy alto.
+
+SECCIÓN 4 — EXPECTATIVAS
+--------------------------------------------------------------------------------
+  Renta esperada: $2.600.000 CLP líquidos
+  Disponibilidad: 15 días (acuerdo especial con empresa actual)
+  Modalidad:      Remoto preferido, híbrido aceptable
+
+================================================================================
+RECOMENDACIÓN FINAL
+================================================================================
+✅ AVANZAR — Candidata prioritaria, hacer oferta esta semana
+
+Perfil más completo del proceso. Técnicamente superior incluso a candidatas
+Senior con más años de experiencia. Combina profundidad técnica, liderazgo
+real y compromiso con diversidad e inclusión. Altamente recomendada.
+
+Riesgo: Alta probabilidad de recibir otras ofertas. Mover rápido.
+
+Entrevistador: Carlos Mendoza
+Firma digital:  cmendoza@empresa.cl — 2025-03-14

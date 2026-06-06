@@ -1,64 +1,37 @@
 """
 src/memory/short_term.py — Memoria de corto plazo del agente.
 
-Mantiene el historial de la conversación activa en memoria RAM.
+Basado en IL2.2 del curso: 2-memory-agent-advanced.ipynb
+Usa ConversationBufferWindowMemory de LangChain para mantener
+los últimos k intercambios de la sesión activa.
+
 Se pierde al cerrar la sesión (corto plazo).
-Compatible con LangChain >= 1.0 usando mensajes nativos.
+La memoria de largo plazo está en long_term.py.
 """
 
 import sys
 from pathlib import Path
-from typing import List, Dict
-
-from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+# Importación directa para uso externo si se necesita
+from langchain.memory import ConversationBufferWindowMemory
 
-class ShortTermMemory:
+
+def create_short_term_memory(k: int = 10) -> ConversationBufferWindowMemory:
     """
-    Memoria de corto plazo con ventana deslizante de k mensajes.
-    Guarda los últimos k intercambios para no exceder el contexto del LLM.
+    Crea una instancia de ConversationBufferWindowMemory.
+
+    Parámetros:
+        k: número de intercambios a recordar (default 10)
+
+    Igual que en el notebook del curso:
+        memory = ConversationBufferWindowMemory(
+            k=1, memory_key="chat_history", return_messages=True
+        )
     """
-
-    def __init__(self, k: int = 10):
-        self.k = k
-        self._messages: List[BaseMessage] = []
-        self._message_count = 0
-
-    def add_interaction(self, human_input: str, ai_output: str) -> None:
-        """Registra un intercambio humano-agente."""
-        self._messages.append(HumanMessage(content=human_input))
-        self._messages.append(AIMessage(content=ai_output))
-        # Mantener solo los últimos k*2 mensajes (k intercambios)
-        if len(self._messages) > self.k * 2:
-            self._messages = self._messages[-(self.k * 2):]
-        self._message_count += 1
-
-    def get_history(self) -> List[BaseMessage]:
-        """Retorna el historial de mensajes para el agente."""
-        return self._messages.copy()
-
-    def get_history_as_text(self) -> str:
-        """Retorna el historial como texto legible."""
-        if not self._messages:
-            return "Sin historial en esta sesión."
-        lines = []
-        for msg in self._messages:
-            role = "Reclutador" if isinstance(msg, HumanMessage) else "Agente"
-            content = msg.content[:200] + "..." if len(msg.content) > 200 else msg.content
-            lines.append(f"{role}: {content}")
-        return "\n".join(lines)
-
-    def clear(self) -> None:
-        """Limpia la memoria de la sesión."""
-        self._messages = []
-        self._message_count = 0
-
-    @property
-    def message_count(self) -> int:
-        return self._message_count
-
-    @property
-    def is_empty(self) -> bool:
-        return self._message_count == 0
+    return ConversationBufferWindowMemory(
+        k=k,
+        memory_key="chat_history",
+        return_messages=True,
+    )

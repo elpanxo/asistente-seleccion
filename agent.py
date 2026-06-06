@@ -1,14 +1,16 @@
 """
 agent.py — Agente funcional de selección de personal.
 
+Basado en el material del curso RA2 (IL2.1, IL2.2, IL2.3).
+
 Integra:
   - Herramientas de consulta, escritura y razonamiento (IE1, IE2)
-  - Memoria de corto plazo (conversación activa) (IE3)
-  - Memoria de largo plazo (persistencia entre sesiones) (IE3)
-  - Planificador de tareas con prioridades (IE5)
-  - Toma de decisiones adaptativas según contexto (IE6)
+  - Memoria de corto plazo con ConversationBufferWindowMemory (IE3)
+  - Memoria de largo plazo persistida en JSON (IE3)
+  - Planificador jerárquico reactivo (IE5)
+  - Toma de decisiones adaptativas ReAct (IE6)
 
-Arquitectura: LangGraph ReAct Agent (compatible con LangChain >= 1.0)
+Stack: LangChain 0.2.x + AgentExecutor + create_openai_tools_agent
 """
 
 import json
@@ -16,15 +18,15 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
-from langchain_core.tools import tool
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain import hub
+from langchain.agents import tool, create_openai_tools_agent, AgentExecutor
+from langchain.memory import ConversationBufferWindowMemory
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
 
 sys.path.insert(0, str(Path(__file__).parent))
 
 from config import GITHUB_TOKEN, GITHUB_ENDPOINT, LLM_MODEL, LLM_TEMPERATURE
-from src.memory.short_term import ShortTermMemory
 from src.memory.long_term import LongTermMemory
 from src.planning.planner import RecruitmentPlanner
 
@@ -32,9 +34,17 @@ from src.planning.planner import RecruitmentPlanner
 _vectorstore     = None
 _job_title       = "Desarrollador/a Backend Senior"
 _job_description = "Buscamos un profesional con experiencia en Python, APIs REST y trabajo en equipo ágil."
-_short_memory    = ShortTermMemory(k=10)
 _long_memory     = LongTermMemory()
 _planner         = RecruitmentPlanner()
+
+# Memoria de corto plazo — ConversationBufferWindowMemory (IL2.2)
+# Guarda los últimos 10 intercambios, igual que el notebook 2-memory-agent-advanced
+_short_memory = ConversationBufferWindowMemory(
+    k=10,
+    memory_key="chat_history",
+    return_messages=True,
+)
+_interaction_count = 0
 
 
 def init_agent(vectorstore, job_title: str, job_description: str) -> None:
@@ -46,7 +56,7 @@ def init_agent(vectorstore, job_title: str, job_description: str) -> None:
     _long_memory.register_process(job_title)
 
 
-# ── Herramientas ──────────────────────────────────────────────────────────────
+# ── Herramientas (IL2.1) ──────────────────────────────────────────────────────
 
 @tool
 def buscar_candidatos(query: str) -> str:
@@ -54,6 +64,7 @@ def buscar_candidatos(query: str) -> str:
     Herramienta de CONSULTA: busca información sobre candidatos
     en la base de datos interna usando búsqueda semántica RAG.
     Úsala para responder preguntas generales sobre los candidatos.
+    El parámetro query debe ser la pregunta en lenguaje natural.
     """
     from src.evaluation.rag_pipeline import query_candidates
     return query_candidates(_vectorstore, query)
@@ -63,11 +74,15 @@ def buscar_candidatos(query: str) -> str:
 def evaluar_candidato(candidate_id: str) -> str:
     """
     Herramienta de RAZONAMIENTO: genera evaluación completa de un candidato
-    con puntuaciones por criterio y justificación detallada.
-    El parámetro candidate_id debe ser el identificador exacto, ej: ana_lopez.
+    con puntuaciones por criterio, fortalezas y justificación.
+    El parámetro candidate_id debe ser el identificador exacto del candidato.
+    Ejemplo: ana_lopez, roberto_sanchez, camila_torres.
     """
     from src.evaluation.rag_pipeline import evaluate_candidate
-    result = evaluate_candidate(_vectorstore, candidate_id, _job_title, _job_description)
+    result = evaluate_candidate(
+        _vectorstore, candidate_id, _job_title, _job_description
+    )
+    # Guardar en memoria de largo plazo automáticamente
     if not result.get("parse_error"):
         _long_memory.record_decision(
             job_title=_job_title,
@@ -83,7 +98,8 @@ def evaluar_candidato(candidate_id: str) -> str:
 @tool
 def rankear_candidatos(candidate_ids_str: str) -> str:
     """
-    Herramienta de ESCRITURA: compara y rankea múltiples candidatos.
+    Herramienta de ESCRITURA: compara y rankea múltiples candidatos
+    generando un informe comparativo con posiciones justificadas.
     El parámetro candidate_ids_str debe ser IDs separados por coma.
     Ejemplo: ana_lopez,roberto_sanchez,camila_torres
     """
@@ -105,8 +121,10 @@ def rankear_candidatos(candidate_ids_str: str) -> str:
 @tool
 def consultar_historial(candidate_id: str) -> str:
     """
-    Herramienta de MEMORIA: recupera evaluaciones previas de un candidato
-    desde la memoria de largo plazo entre sesiones.
+    Herramienta de MEMORIA LARGO PLAZO: recupera evaluaciones previas
+    de un candidato guardadas entre sesiones.
+    Úsala cuando el reclutador pregunte si un candidato ya fue evaluado.
+    El parámetro candidate_id debe ser el identificador del candidato.
     """
     history = _long_memory.get_candidate_history(candidate_id)
     if not history:
@@ -117,8 +135,9 @@ def consultar_historial(candidate_id: str) -> str:
 @tool
 def resumen_proceso(job_title: str) -> str:
     """
-    Herramienta de ESCRITURA: genera resumen del proceso de selección
-    con los mejores candidatos identificados hasta ahora.
+    Herramienta de ESCRITURA: genera resumen del estado actual del
+    proceso de selección con los mejores candidatos hasta ahora.
+    El parámetro job_title debe ser el nombre exacto del cargo.
     """
     process = _long_memory.get_process(job_title)
     if not process:
@@ -133,52 +152,26 @@ def resumen_proceso(job_title: str) -> str:
     return json.dumps(summary, ensure_ascii=False, indent=2)
 
 
-# ── LLM ───────────────────────────────────────────────────────────────────────
+# ── Construcción del agente (IL2.1 + IL2.2) ──────────────────────────────────
 
-def _get_llm() -> ChatOpenAI:
-    return ChatOpenAI(
+def _build_agent_executor() -> AgentExecutor:
+    """
+    Construye el AgentExecutor siguiendo el patrón del curso RA2.
+
+    Igual que en 3-langchain-agent.ipynb y 2-memory-agent-advanced.ipynb:
+      1. Definir LLM
+      2. Definir herramientas con @tool
+      3. Descargar prompt de LangChain Hub
+      4. create_openai_tools_agent(llm, tools, prompt)
+      5. AgentExecutor(agent, tools, verbose=True)
+    """
+    llm = ChatOpenAI(
         model=LLM_MODEL,
         temperature=LLM_TEMPERATURE,
-        api_key=GITHUB_TOKEN,
-        base_url=GITHUB_ENDPOINT,
+        openai_api_base=GITHUB_ENDPOINT,
+        openai_api_key=GITHUB_TOKEN,
     )
 
-
-# ── Ejecución del agente ──────────────────────────────────────────────────────
-
-def run_agent(query: str, available_candidates: List[str]) -> Dict[str, Any]:
-    """
-    Ejecuta el agente con planificación previa y memoria integrada.
-
-    Flujo:
-      1. Planificador analiza la consulta y genera un plan
-      2. Si hay memoria de largo plazo relevante, se agrega al contexto
-      3. El agente ReAct ejecuta con historial de conversación
-      4. La respuesta se guarda en memoria de corto plazo
-    """
-    # 1. Planificar
-    plan = _planner.analyze(query, available_candidates, _job_title)
-    plan_display = _planner.format_plan_for_display(plan)
-
-    # 2. Enriquecer con memoria de largo plazo si aplica
-    enriched_query = query
-    memory_used = False
-    if plan.use_long_term:
-        process_data = _long_memory.get_process(_job_title)
-        if process_data and process_data["decisions"]:
-            top = _long_memory.get_top_candidates(_job_title, 3)
-            enriched_query = (
-                query +
-                f"\n\n[CONTEXTO DE MEMORIA]: Ya se han evaluado "
-                f"{len(process_data['candidates_evaluated'])} candidatos. "
-                f"Top actuales: {json.dumps(top, ensure_ascii=False)}"
-            )
-            memory_used = True
-
-    # 3. Construir historial para el agente
-    chat_history = _short_memory.get_history()
-
-    # 4. Crear y ejecutar agente ReAct con LangGraph
     tools = [
         buscar_candidatos,
         evaluar_candidato,
@@ -187,53 +180,94 @@ def run_agent(query: str, available_candidates: List[str]) -> Dict[str, Any]:
         resumen_proceso,
     ]
 
-    SYSTEM_PROMPT = """Eres un agente especializado en selección de personal.
-Tienes acceso a herramientas para buscar, evaluar y rankear candidatos.
-Usa las herramientas necesarias en el orden correcto para responder.
-Siempre justifica tus decisiones basándote en evidencia de los documentos.
-Nunca discrimines por género, edad, etnia o religión."""
+    # Prompt del hub — mismo que usa el curso en todos los notebooks
+    prompt = hub.pull("hwchase17/openai-tools-agent")
 
-    agent = create_react_agent(
-        model=_get_llm(),
+    agent = create_openai_tools_agent(llm, tools, prompt)
+
+    return AgentExecutor(
+        agent=agent,
         tools=tools,
-        prompt=SYSTEM_PROMPT,
+        verbose=True,
+        max_iterations=6,
+        handle_parsing_errors=True,
+        return_intermediate_steps=True,
     )
 
-    # Construir mensajes con historial
-    messages = []
-    for msg in chat_history:
-        messages.append(msg)
-    messages.append({"role": "user", "content": enriched_query})
 
-    result = agent.invoke({"messages": messages})
+# ── Función principal (IL2.2 + IL2.3) ────────────────────────────────────────
 
-    # Extraer respuesta y pasos intermedios
-    output = result["messages"][-1].content
-    steps = [
-        (msg.name, msg.content)
-        for msg in result["messages"]
-        if hasattr(msg, "name") and msg.name
-    ]
+def run_agent(query: str, available_candidates: List[str]) -> Dict[str, Any]:
+    """
+    Ejecuta el agente con planificación y memoria integradas.
 
-    # 5. Guardar en memoria de corto plazo
-    _short_memory.add_interaction(query, output)
+    Flujo (basado en 2-memory-agent-advanced.ipynb):
+      1. Planificador analiza la consulta → plan de ejecución
+      2. Cargar historial desde ConversationBufferWindowMemory
+      3. Enriquecer consulta con memoria de largo plazo si aplica
+      4. Invocar AgentExecutor con chat_history
+      5. Guardar respuesta en memoria de corto plazo
+    """
+    global _interaction_count
+
+    # 1. Planificar (IL2.3)
+    plan = _planner.analyze(query, available_candidates, _job_title)
+    plan_display = _planner.format_plan_for_display(plan)
+
+    # 2. Cargar historial de corto plazo (IL2.2)
+    chat_history = _short_memory.load_memory_variables({})["chat_history"]
+
+    # 3. Enriquecer con memoria de largo plazo si aplica (IL2.2)
+    enriched_query = query
+    memory_used = False
+    if plan.use_long_term:
+        process_data = _long_memory.get_process(_job_title)
+        if process_data and process_data["decisions"]:
+            top = _long_memory.get_top_candidates(_job_title, 3)
+            enriched_query = (
+                query +
+                f"\n\n[CONTEXTO DE MEMORIA LARGO PLAZO]: "
+                f"Ya se han evaluado {len(process_data['candidates_evaluated'])} "
+                f"candidatos en este proceso. "
+                f"Top actuales: {json.dumps(top, ensure_ascii=False)}"
+            )
+            memory_used = True
+
+    # 4. Ejecutar agente
+    agent_executor = _build_agent_executor()
+    result = agent_executor.invoke({
+        "input": enriched_query,
+        "chat_history": chat_history,
+    })
+
+    output = result.get("output", "")
+    steps  = result.get("intermediate_steps", [])
+
+    # 5. Guardar en memoria de corto plazo (IL2.2)
+    _short_memory.save_context(
+        {"input": query},
+        {"output": output},
+    )
+    _interaction_count += 1
 
     return {
         "output":       output,
         "plan":         plan_display,
         "steps":        steps,
         "memory_used":  memory_used,
-        "short_memory": _short_memory.message_count,
+        "short_memory": _interaction_count,
     }
 
 
-# ── Accesores de memoria ──────────────────────────────────────────────────────
+# ── Accesores para la UI ──────────────────────────────────────────────────────
 
-def get_short_memory() -> ShortTermMemory:
-    return _short_memory
+def get_short_memory_count() -> int:
+    return _interaction_count
 
 def get_long_memory() -> LongTermMemory:
     return _long_memory
 
 def clear_short_memory() -> None:
+    global _interaction_count
     _short_memory.clear()
+    _interaction_count = 0
