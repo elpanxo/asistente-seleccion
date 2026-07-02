@@ -1,0 +1,102 @@
+CURRÍCULUM VITAE
+================================================================================
+
+INFORMACIÓN PERSONAL
+--------------------------------------------------------------------------------
+Nombre:     Diego Fernández Vargas
+Correo:     diego.fernandez@email.com
+LinkedIn:   linkedin.com/in/diegofernandez-devops
+GitHub:     github.com/diegofv
+Ubicación:  Santiago, Chile
+
+================================================================================
+RESUMEN PROFESIONAL
+--------------------------------------------------------------------------------
+Ingeniero DevOps con 4 años de experiencia diseñando e implementando
+infraestructura cloud escalable para empresas de tecnología financiera.
+Especializado en automatización de pipelines CI/CD, contenedores y
+orquestación con Kubernetes. Apasionado por reducir la fricción entre
+desarrollo y operaciones, con foco en seguridad y observabilidad.
+
+================================================================================
+EXPERIENCIA LABORAL
+--------------------------------------------------------------------------------
+
+2022 – 2025 | FinTech Solutions S.A. — Ingeniero DevOps Senior
+  • Diseñó e implementó infraestructura como código con Terraform para
+    más de 40 microservicios en AWS, reduciendo el tiempo de provisioning
+    de 3 días a 45 minutos.
+  • Migró arquitectura monolítica a contenedores Docker orquestados con
+    Kubernetes (EKS), logrando 99.95% de disponibilidad en producción.
+  • Implementó pipeline CI/CD completo con GitHub Actions y ArgoCD,
+    reduciendo el ciclo de deploy de 2 semanas a 3 horas.
+  • Configuró sistema de observabilidad con Prometheus, Grafana y
+    ELK Stack, reduciendo el tiempo de detección de incidentes en 70%.
+  • Lideró migración a multi-region AWS (us-east-1 y sa-east-1) para
+    cumplir normativas de datos financieros de la CMF.
+
+2020 – 2022 | AgenciaCloud — Ingeniero de Infraestructura
+  • Administración de servidores Linux (Ubuntu/CentOS) en entornos
+    on-premise e híbridos.
+  • Automatización de tareas con Ansible y scripts Bash.
+  • Configuración de balanceadores de carga Nginx y HAProxy.
+  • Soporte a equipos de desarrollo en configuración de entornos locales
+    con Docker Compose.
+
+================================================================================
+EDUCACIÓN
+--------------------------------------------------------------------------------
+2015 – 2020 | Ingeniería en Redes y Telecomunicaciones
+              Universidad Tecnológica Metropolitana (UTEM)
+              Promedio: 5.6 / 7.0
+
+2023        | AWS Certified DevOps Engineer – Professional
+              Amazon Web Services
+
+2022        | Certified Kubernetes Administrator (CKA)
+              Cloud Native Computing Foundation
+
+2021        | HashiCorp Terraform Associate
+              HashiCorp
+
+================================================================================
+HABILIDADES TÉCNICAS
+--------------------------------------------------------------------------------
+Cloud:          AWS (EKS, EC2, RDS, S3, Lambda, CloudFront, Route53)
+Contenedores:   Docker, Kubernetes, Helm, ArgoCD
+IaC:            Terraform, Ansible, CloudFormation
+CI/CD:          GitHub Actions, Jenkins, GitLab CI
+Observabilidad: Prometheus, Grafana, ELK Stack, Datadog
+Lenguajes:      Python, Bash, YAML, HCL
+Bases de datos: PostgreSQL, Redis, DynamoDB
+Seguridad:      IAM, Vault, Secrets Manager, WAF
+
+================================================================================
+PROYECTOS DESTACADOS
+--------------------------------------------------------------------------------
+• terraform-aws-fintech-modules (GitHub, 178 ⭐)
+  Colección de módulos Terraform para infraestructura financiera en AWS.
+  Usado por 8 empresas fintech en Chile y Perú.
+
+• k8s-multi-region-blueprint (GitHub, 95 ⭐)
+  Blueprint de Kubernetes multi-region con failover automático.
+  Presentado en AWS Community Day Chile 2024.
+
+• Plataforma de pagos FinTech Solutions
+  Infraestructura para sistema que procesa $2.3 millones USD diarios.
+  Cero incidentes de seguridad en 2 años de operación.
+
+================================================================================
+IDIOMAS
+--------------------------------------------------------------------------------
+Español: Nativo
+Inglés:  B2 — Documentación técnica y reuniones con proveedores
+
+================================================================================
+PARTICIPACIÓN EN COMUNIDAD
+--------------------------------------------------------------------------------
+• Speaker en AWS Community Day Chile 2024
+  Charla: "Kubernetes multi-region sin morir en el intento"
+• Co-organizador del meetup DevOps Chile — 650 miembros
+• Colaborador activo en CNCF (Cloud Native Computing Foundation)
+  2 PRs aceptados en proyectos open source de observabilidad

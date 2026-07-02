@@ -1,0 +1,64 @@
+REGISTRO DE ENTREVISTA TÉCNICA
+================================================================================
+Candidato:      Diego Fernández Vargas
+Cargo:          Desarrollador Backend Senior
+Fecha:          2025-03-18
+Entrevistador:  Carlos Mendoza (Tech Lead)
+Duración:       65 minutos
+================================================================================
+
+SECCIÓN 1 — EVALUACIÓN TÉCNICA
+--------------------------------------------------------------------------------
+Ejercicio propuesto: Diseñar un sistema de rate limiting distribuido para una
+API con 10.000 usuarios concurrentes.
+
+Desempeño:
+  El candidato propuso una solución sólida con Redis y Token Bucket, aunque
+  su enfoque estuvo más orientado a la infraestructura que al código. Diseñó
+  correctamente cómo desplegar el sistema en Kubernetes con alta disponibilidad
+  y cómo monitorearlo con Prometheus, pero tuvo dificultades al momento de
+  escribir el código Python de la implementación. Requirió orientación parcial
+  para completar la lógica de la API.
+
+  Su conocimiento de sistemas distribuidos es sólido desde la perspectiva
+  de infraestructura, pero le falta profundidad en desarrollo de software.
+
+Puntuación técnica: 6.5 / 10
+Observación: Perfil DevOps muy fuerte. Para un rol Backend Senior puro,
+le falta experiencia en desarrollo de aplicaciones. Sería ideal para un
+rol Backend con componente de infraestructura o un rol DevOps Senior.
+
+SECCIÓN 2 — COMUNICACIÓN Y LIDERAZGO
+--------------------------------------------------------------------------------
+  Buena comunicación. Explica conceptos de infraestructura con claridad.
+  Tiene experiencia liderando migraciones complejas y coordinando con
+  equipos de desarrollo. Mencionó que ha gestionado incidentes críticos
+  en producción con equipos de 8 personas.
+
+SECCIÓN 3 — CULTURA Y FIT DE EQUIPO
+--------------------------------------------------------------------------------
+  Positivo. Buena actitud colaborativa. Preguntó específicamente sobre
+  la madurez de la infraestructura actual y sobre oportunidades para
+  implementar mejores prácticas de DevOps en el equipo.
+
+  Podría ser un aporte grande si el rol incluye responsabilidades de
+  infraestructura además del desarrollo backend.
+
+SECCIÓN 4 — EXPECTATIVAS
+--------------------------------------------------------------------------------
+  Renta esperada: $2.200.000 CLP líquidos
+  Disponibilidad: 15 días
+  Modalidad:      Remoto preferido
+
+================================================================================
+RECOMENDACIÓN FINAL
+================================================================================
+⏳ EN ESPERA — Evaluar para rol híbrido Backend/DevOps
+
+Perfil muy valioso pero no exactamente el del cargo Backend Senior puro.
+Recomendado si el equipo necesita alguien que pueda desarrollar backend
+y además hacerse cargo de la infraestructura. Mantener en pipeline para
+próxima apertura de rol DevOps Senior.
+
+Entrevistador: Carlos Mendoza
+Firma digital:  cmendoza@empresa.cl — 2025-03-18

@@ -2,13 +2,47 @@
   "processes": {
     "Desarrollador/a Backend Senior": {
       "created_at": "2026-05-30T15:38:37.332223",
-      "candidates_evaluated": [],
-      "decisions": [],
+      "candidates_evaluated": [
+        "camila_torres",
+        "roberto_sanchez",
+        "diego_fernandez",
+        "ana_lopez"
+      ],
+      "decisions": [
+        {
+          "candidate_id": "roberto_sanchez",
+          "recommendation": "en_espera",
+          "score": 5.45,
+          "notes": "La evaluación se basó en méritos, considerando únicamente la experiencia, habilidades y logros del candidato.",
+          "date": "2026-06-06T15:27:19.390797"
+        },
+        {
+          "candidate_id": "diego_fernandez",
+          "recommendation": "en_espera",
+          "score": 5.05,
+          "notes": "La evaluación se basó en méritos, considerando únicamente la experiencia, habilidades y logros del candidato.",
+          "date": "2026-06-06T15:27:29.649153"
+        },
+        {
+          "candidate_id": "camila_torres",
+          "recommendation": "en_espera",
+          "score": 5.7,
+          "notes": "La evaluación se basó en méritos, considerando únicamente la experiencia, habilidades y logros del candidato.",
+          "date": "2026-06-06T17:20:46.734239"
+        },
+        {
+          "candidate_id": "ana_lopez",
+          "recommendation": "avanzar",
+          "score": 6.9,
+          "notes": "La evaluación se basó en méritos, sin considerar información que pudiera inducir sesgo.",
+          "date": "2026-06-06T17:22:17.764942"
+        }
+      ],
       "recruiter_notes": ""
     }
   },
   "global_context": {
-    "total_evaluations": 0,
-    "last_active": null
+    "total_evaluations": 6,
+    "last_active": "2026-06-06T17:22:17.764942"
   }
 }

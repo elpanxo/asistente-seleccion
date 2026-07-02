@@ -29,6 +29,18 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config import GITHUB_TOKEN, GITHUB_ENDPOINT, LLM_MODEL, LLM_TEMPERATURE
 from src.memory.long_term import LongTermMemory
 from src.planning.planner import RecruitmentPlanner
+# RA3 — carga dinámica para evitar problemas de módulos
+import importlib.util as _ilu2, os as _os2
+def _load_mod(rel, name):
+    base = _os2.path.dirname(_os2.path.abspath(__file__))
+    spec = _ilu2.spec_from_file_location(name, _os2.path.join(base, rel))
+    m = _ilu2.module_from_spec(spec); spec.loader.exec_module(m); return m
+_m = _load_mod("src/observability/metrics.py", "metrics")
+_g = _load_mod("src/security/guard.py", "guard")
+session_metrics = _m.session_metrics
+input_guard     = _g.input_guard
+rate_limiter    = _g.rate_limiter
+ethics_monitor  = _g.ethics_monitor
 
 # ── Estado global ─────────────────────────────────────────────────────────────
 _vectorstore     = None
@@ -199,19 +211,40 @@ def _build_agent_executor() -> AgentExecutor:
 
 def run_agent(query: str, available_candidates: List[str]) -> Dict[str, Any]:
     """
-    Ejecuta el agente con planificación y memoria integradas.
+    Ejecuta el agente con planificación, memoria y observabilidad integradas.
 
-    Flujo (basado en 2-memory-agent-advanced.ipynb):
-      1. Planificador analiza la consulta → plan de ejecución
-      2. Cargar historial desde ConversationBufferWindowMemory
-      3. Enriquecer consulta con memoria de largo plazo si aplica
+    Flujo (basado en 2-memory-agent-advanced.ipynb + RA3):
+      0. Seguridad: validar input y rate limiting (IL3.3)
+      1. Planificador analiza la consulta → plan de ejecución (IL2.3)
+      2. Cargar historial desde ConversationBufferWindowMemory (IL2.2)
+      3. Enriquecer consulta con memoria de largo plazo si aplica (IL2.2)
       4. Invocar AgentExecutor con chat_history
-      5. Guardar respuesta en memoria de corto plazo
+      5. Guardar respuesta en memoria de corto plazo (IL2.2)
+      6. Registrar métricas de rendimiento (IL3.1)
+      7. Verificar ética de la respuesta (IL3.3)
     """
     global _interaction_count
 
+    # 0. Seguridad: validar input y rate limiting (IL3.3)
+    allowed, wait_secs = rate_limiter.is_allowed("session")
+    if not allowed:
+        return {
+            "output": f"⚠️ Demasiadas consultas. Espera {wait_secs} segundos antes de continuar.",
+            "plan": {}, "steps": [], "memory_used": False, "short_memory": _interaction_count,
+            "blocked_by_rate_limit": True,
+        }
+
+    clean_query, is_safe, reason = input_guard.sanitize(query)
+    if not is_safe:
+        session_metrics.record_interaction("security_block", 0.001, success=False)
+        return {
+            "output": f"⚠️ {reason}",
+            "plan": {}, "steps": [], "memory_used": False, "short_memory": _interaction_count,
+            "blocked_by_security": True,
+        }
+
     # 1. Planificar (IL2.3)
-    plan = _planner.analyze(query, available_candidates, _job_title)
+    plan = _planner.analyze(clean_query, available_candidates, _job_title)
     plan_display = _planner.format_plan_for_display(plan)
 
     # 2. Cargar historial de corto plazo (IL2.2)
@@ -233,7 +266,9 @@ def run_agent(query: str, available_candidates: List[str]) -> Dict[str, Any]:
             )
             memory_used = True
 
-    # 4. Ejecutar agente
+    # 4. Ejecutar agente (con medición de tiempo IL3.1)
+    import time as _time
+    _start_time = _time.time()
     agent_executor = _build_agent_executor()
     result = agent_executor.invoke({
         "input": enriched_query,
@@ -249,6 +284,25 @@ def run_agent(query: str, available_candidates: List[str]) -> Dict[str, Any]:
         {"output": output},
     )
     _interaction_count += 1
+
+    # 6. Registrar métricas de rendimiento (IL3.1)
+    import time as _time
+    duration = _time.time() - _start_time if '_start_time' in dir() else 0
+    tool_used = plan_display.get("herramientas", "").split(" → ")[0] if plan_display else None
+    session_metrics.record_interaction(
+        operation=plan_display.get("tipo_tarea", "chat") if plan_display else "chat",
+        duration=duration,
+        success=True,
+        tool_used=tool_used,
+    )
+
+    # 7. Verificar ética de la respuesta (IL3.3)
+    is_ethical, ethics_warning = ethics_monitor.check_response(output)
+    if not is_ethical:
+        output = output + f"\n\n{ethics_warning}"
+
+    # 8. Sanitizar output (IL3.3)
+    output = input_guard.sanitize_output(output)
 
     return {
         "output":       output,

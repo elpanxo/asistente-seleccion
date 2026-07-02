@@ -14,6 +14,25 @@ ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
 
 from config import CVS_DIR
+# RA3 — Observabilidad y Seguridad (importación dinámica)
+import importlib.util as _ilu, os as _os
+
+def _load_module(rel_path, module_name):
+    base = _os.path.dirname(_os.path.abspath(__file__))
+    full = _os.path.join(base, rel_path)
+    spec = _ilu.spec_from_file_location(module_name, full)
+    mod  = _ilu.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+_metrics_mod = _load_module("src/observability/metrics.py", "metrics")
+_guard_mod   = _load_module("src/security/guard.py",        "guard")
+
+session_metrics   = _metrics_mod.session_metrics
+analyze_audit_log = _metrics_mod.analyze_audit_log
+input_guard       = _guard_mod.input_guard
+rate_limiter      = _guard_mod.rate_limiter
+ethics_monitor    = _guard_mod.ethics_monitor
 from src.rag.ingestion import load_single_file, split_documents
 from src.rag.vectorstore import (
     add_documents,
@@ -176,13 +195,10 @@ h1, h2, h3 { font-family: 'Sora', sans-serif !important; font-weight: 600 !impor
 #MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] { display: none !important; }
 [data-testid="stHeader"] { display: none !important; }
 .block-container { padding-top: 0.5rem !important; max-width: 100% !important; }
-/* Botón para colapsar/expandir sidebar siempre visible */
-[data-testid="stSidebarCollapseButton"] { display: flex !important; }
-section[data-testid="stSidebarCollapsedControl"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
+/* Ocultar botón de colapsar sidebar — siempre visible */
+[data-testid="stSidebarCollapseButton"] { display: none !important; }
+[data-testid="collapsedControl"] { display: none !important; }
+section[data-testid="stSidebarCollapsedControl"] { display: none !important; }
 </style>
 <script>
 // Forzar sidebar expandido al cargar
@@ -330,10 +346,58 @@ st.markdown("""
 body:has([data-testid="stSidebar"][aria-expanded="false"]) .sidebar-toggle-btn {
     display: block !important;
 }
+/* Forzar sidebar siempre visible */
+[data-testid="stSidebar"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    width: 21rem !important;
+    min-width: 21rem !important;
+}
+[data-testid="stSidebarCollapseButton"] { display: none !important; }
+[data-testid="collapsedControl"] { display: none !important; }
+section[data-testid="stSidebarCollapsedControl"] { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
-tab_chat, tab_eval, tab_rank, tab_audit = st.tabs(["Chat", "Evaluación", "Ranking", "Auditoría"])
+# Forzar apertura del sidebar via JS
+st.components.v1.html("""
+<script>
+(function forceSidebar() {
+    function expand() {
+        // Buscar y hacer clic en el botón de expandir si existe
+        var btns = parent.document.querySelectorAll('[data-testid="collapsedControl"] button, [data-testid="stSidebarCollapseButton"]');
+        btns.forEach(function(btn) { btn.click(); });
+        
+        // Remover clase de colapsado del sidebar
+        var sidebar = parent.document.querySelector('[data-testid="stSidebar"]');
+        if (sidebar) {
+            sidebar.style.display = 'block';
+            sidebar.style.visibility = 'visible';
+            sidebar.style.transform = 'none';
+            sidebar.style.width = '21rem';
+            sidebar.setAttribute('aria-expanded', 'true');
+        }
+        
+        // Limpiar localStorage de Streamlit
+        try {
+            var keys = Object.keys(parent.localStorage);
+            keys.forEach(function(k) {
+                if (k.includes('sidebar') || k.includes('Sidebar')) {
+                    parent.localStorage.removeItem(k);
+                }
+            });
+        } catch(e) {}
+    }
+    expand();
+    setTimeout(expand, 500);
+    setTimeout(expand, 1500);
+})();
+</script>
+""", height=0)
+
+tab_chat, tab_eval, tab_rank, tab_audit, tab_obs = st.tabs(["Chat", "Evaluación", "Ranking", "Auditoría", "Observabilidad"])
 
 
 # ── CHAT ─────────────────────────────────────────────────────────────────────
@@ -683,3 +747,211 @@ with tab_audit:
             detail = (detail[:50] + "…") if detail and len(detail) > 50 else (detail or "")
             with st.expander(f"{ts}  ·  {etype}  ·  {detail}"):
                 st.json(entry)
+
+
+
+# ── OBSERVABILIDAD ───────────────────────────────────────────────────────────
+with tab_obs:
+    st.markdown("### 📊 Métricas de Rendimiento")
+
+    summary = session_metrics.get_summary()
+
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        st.metric("Interacciones", summary["total_interactions"])
+    with c2:
+        st.metric("Errores", summary["total_errors"])
+    with c3:
+        st.metric("Tasa de error", f"{summary['error_rate_pct']}%")
+    with c4:
+        st.metric("Tiempo prom.", f"{summary['avg_response_ms']} ms")
+
+    c5, c6, c7 = st.columns(3)
+    with c5:
+        st.metric("Tiempo mín.", f"{summary['min_response_ms']} ms")
+    with c6:
+        st.metric("Tiempo máx.", f"{summary['max_response_ms']} ms")
+    with c7:
+        st.metric("Uptime sesión", f"{summary['session_uptime_sec']} s")
+
+    # Herramientas más usadas
+    top_tools = session_metrics.get_top_tools()
+    if top_tools:
+        st.markdown(
+            "<div style='font-size:0.7rem;color:#555;text-transform:uppercase;"
+            "letter-spacing:0.08em;margin:12px 0 8px 0'>Herramientas más usadas</div>",
+            unsafe_allow_html=True,
+        )
+        for t in top_tools:
+            pct = (t["count"] / summary["total_interactions"] * 100) if summary["total_interactions"] > 0 else 0
+            st.markdown(
+                f"<div style='display:flex;align-items:center;gap:12px;margin-bottom:6px'>"
+                f"<code style='color:#10a37f;min-width:180px;font-size:0.8rem'>{t['tool']}</code>"
+                f"<div style='flex:1;background:#2a2a2a;border-radius:4px;height:8px'>"
+                f"<div style='background:#10a37f;width:{min(pct,100):.0f}%;height:8px;border-radius:4px'></div></div>"
+                f"<span style='color:#888;font-size:0.78rem;min-width:40px'>{t['count']}x</span>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+    # Historial de interacciones
+    history = session_metrics.get_history(10)
+    if history:
+        with st.expander("Historial de interacciones (últimas 10)"):
+            for h in reversed(history):
+                color = "#10a37f" if h["success"] else "#ef4444"
+                st.markdown(
+                    f"<div style='font-size:0.78rem;padding:4px 0;border-bottom:1px solid #2a2a2a'>"
+                    f"<span style='color:{color}'>●</span> "
+                    f"<span style='color:#888'>{h['timestamp'][11:19]}</span> &nbsp;"
+                    f"<span style='color:#ccc'>{h['operation']}</span> &nbsp;"
+                    f"<span style='color:#555'>{h['duration_ms']} ms</span>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+    if st.button("Reiniciar métricas de sesión", key="reset_metrics"):
+        session_metrics.reset()
+        st.success("Métricas reiniciadas.")
+        st.rerun()
+
+    st.divider()
+
+    st.divider()
+    st.markdown("### 🔍 Trazabilidad e Historial")
+
+    audit_analysis = analyze_audit_log()
+
+    if "error" in audit_analysis:
+        st.info(audit_analysis["error"])
+    else:
+        ca1, ca2, ca3 = st.columns(3)
+        with ca1:
+            st.metric("Total eventos", audit_analysis["total_events"])
+        with ca2:
+            evals = audit_analysis["by_event_type"].get("candidate_evaluation", 0)
+            st.metric("Evaluaciones", evals)
+        with ca3:
+            queries = audit_analysis["by_event_type"].get("qa_query", 0)
+            st.metric("Consultas Q&A", queries)
+
+        # Distribución de eventos
+        by_type = audit_analysis.get("by_event_type", {})
+        if by_type:
+            st.markdown(
+                "<div style='font-size:0.7rem;color:#555;text-transform:uppercase;"
+                "letter-spacing:0.08em;margin:12px 0 8px 0'>Distribución de eventos históricos</div>",
+                unsafe_allow_html=True,
+            )
+            total_ev = sum(by_type.values())
+            for etype, count in sorted(by_type.items(), key=lambda x: x[1], reverse=True):
+                pct = count / total_ev * 100 if total_ev > 0 else 0
+                st.markdown(
+                    f"<div style='display:flex;align-items:center;gap:12px;margin-bottom:6px'>"
+                    f"<span style='color:#888;min-width:200px;font-size:0.8rem'>{etype}</span>"
+                    f"<div style='flex:1;background:#2a2a2a;border-radius:4px;height:8px'>"
+                    f"<div style='background:#1a56a0;width:{min(pct,100):.0f}%;height:8px;border-radius:4px'></div></div>"
+                    f"<span style='color:#888;font-size:0.78rem;min-width:50px'>{count} ({pct:.0f}%)</span>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+        # Candidatos más evaluados
+        cand_counts = audit_analysis.get("candidates_evaluated", {})
+        if cand_counts:
+            with st.expander("Candidatos más evaluados"):
+                for cid, cnt in sorted(cand_counts.items(), key=lambda x: x[1], reverse=True):
+                    st.markdown(
+                        f"<div style='font-size:0.83rem;padding:4px 0;border-bottom:1px solid #2a2a2a'>"
+                        f"<span style='color:#ccc'>{cid}</span>"
+                        f"<span style='color:#555;float:right'>{cnt} evaluacion(es)</span></div>",
+                        unsafe_allow_html=True,
+                    )
+
+        # Recomendaciones históricas
+        recs = audit_analysis.get("recommendations_given", {})
+        if recs:
+            total_r = sum(recs.values())
+            st.markdown(
+                "<div style='font-size:0.7rem;color:#555;text-transform:uppercase;"
+                "letter-spacing:0.08em;margin:12px 0 8px 0'>Distribución de recomendaciones históricas</div>",
+                unsafe_allow_html=True,
+            )
+            colors_rec = {"avanzar": "#10a37f", "en_espera": "#f59e0b", "descartar": "#ef4444"}
+            for rec, cnt in recs.items():
+                pct = cnt / total_r * 100 if total_r > 0 else 0
+                color = colors_rec.get(rec, "#888")
+                st.markdown(
+                    f"<div style='display:flex;align-items:center;gap:12px;margin-bottom:6px'>"
+                    f"<span style='color:{color};min-width:120px;font-size:0.8rem'>{rec}</span>"
+                    f"<div style='flex:1;background:#2a2a2a;border-radius:4px;height:8px'>"
+                    f"<div style='background:{color};width:{min(pct,100):.0f}%;height:8px;border-radius:4px;opacity:0.7'></div></div>"
+                    f"<span style='color:#888;font-size:0.78rem'>{cnt} ({pct:.0f}%)</span>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+    st.divider()
+
+    st.divider()
+    st.markdown("### 🔒 Seguridad y Ética")
+
+    cs1, cs2 = st.columns(2)
+    with cs1:
+        remaining = rate_limiter.remaining("session")
+        st.metric("Consultas disponibles / min", remaining)
+    with cs2:
+        st.metric("Límite por minuto", rate_limiter.rpm)
+
+    # Reporte ético
+    audit_events = []
+    audit_path = __import__('pathlib').Path(__import__('config').AUDIT_LOG_FILE)
+    if audit_path.exists():
+        import json as _json
+        with open(audit_path, 'r', encoding='utf-8') as _f:
+            audit_events = [_json.loads(l) for l in _f if l.strip()]
+
+    ethics_report = ethics_monitor.generate_ethics_report(audit_events)
+    st.markdown(
+        f'<div class="ethics-box" style="margin-top:8px">'
+        f'<strong>Reporte Ético del Sistema</strong><br><br>'
+        f'Evaluaciones totales: <strong>{ethics_report.get("total_evaluaciones", 0)}</strong><br>'
+        f'Candidatos únicos: <strong>{ethics_report.get("candidatos_unicos", 0)}</strong><br>',
+        unsafe_allow_html=True,
+    )
+    dist = ethics_report.get("distribucion_recomendaciones", {})
+    if dist:
+        for k, v in dist.items():
+            st.markdown(
+                f"<span style='color:#aaa;font-size:0.82rem'>&nbsp;&nbsp;{k}: {v}</span><br>",
+                unsafe_allow_html=True,
+            )
+    st.markdown(
+        f"<br><em style='color:#7ec8a8;font-size:0.8rem'>"
+        f"{ethics_report.get('nota_etica', '')}</em></div>",
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+
+    st.divider()
+    st.markdown("### 📈 Escalabilidad")
+
+    st.markdown("""
+    <div style='background:#1e1e1e;border:1px solid #2a2a2a;border-radius:10px;padding:16px;font-size:0.83rem;color:#aaa;line-height:1.8'>
+    <strong style='color:#ececec'>Estrategias de escalabilidad implementadas:</strong><br>
+    <span style='color:#10a37f'>✓</span> Embeddings locales (sentence-transformers) — sin dependencia de APIs externas<br>
+    <span style='color:#10a37f'>✓</span> ChromaDB persistido en disco — escala hasta miles de candidatos sin servidor<br>
+    <span style='color:#10a37f'>✓</span> Chunking configurable — ajustable según volumen de documentos<br>
+    <span style='color:#10a37f'>✓</span> Rate limiting — protege contra sobrecarga del sistema<br>
+    <span style='color:#10a37f'>✓</span> Reintentos con backoff exponencial — resiliencia ante fallas de API<br>
+    <span style='color:#10a37f'>✓</span> Memoria LP en JSON — portable y sin dependencias de base de datos<br>
+    <br>
+    <strong style='color:#ececec'>Recomendaciones para mayor escala:</strong><br>
+    <span style='color:#555'>→</span> Migrar ChromaDB a Pinecone o Weaviate para escala distribuida<br>
+    <span style='color:#555'>→</span> Agregar cola de mensajes (Redis/RabbitMQ) para evaluaciones asíncronas<br>
+    <span style='color:#555'>→</span> Containerizar con Docker para despliegue horizontal<br>
+    <span style='color:#555'>→</span> Implementar caché de evaluaciones para candidatos ya procesados<br>
+    <span style='color:#555'>→</span> Usar modelos locales (Ollama) para reducir costos de API a escala<br>
+    </div>
+    """, unsafe_allow_html=True)

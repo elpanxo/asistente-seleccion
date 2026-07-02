@@ -1,0 +1,58 @@
+REGISTRO DE ENTREVISTA TÉCNICA
+================================================================================
+Candidata:      Ana López Martínez
+Cargo:          Desarrolladora Backend Senior
+Fecha:          2025-03-10
+Entrevistador:  Carlos Mendoza (Tech Lead)
+Duración:       75 minutos
+================================================================================
+
+SECCIÓN 1 — EVALUACIÓN TÉCNICA
+--------------------------------------------------------------------------------
+Ejercicio propuesto: Diseñar un sistema de rate limiting distribuido para una
+API con 10.000 usuarios concurrentes.
+
+Desempeño:
+  La candidata propuso una solución usando Redis con el algoritmo Token Bucket,
+  considerando correctamente los trade-offs con Sliding Window. Implementó
+  el pseudocódigo en menos de 20 minutos y luego optimizó espontáneamente
+  el diseño para manejar particiones de red (problema CAP theorem).
+
+Puntuación técnica: 9.0 / 10
+Observación: Uno de los mejores enfoques vistos en el proceso. Demostró
+pensamiento sistémico y no solo código.
+
+SECCIÓN 2 — COMUNICACIÓN Y LIDERAZGO
+--------------------------------------------------------------------------------
+  Excelente. Explicó conceptos complejos con analogías claras. Cuando no
+  sabía algo (pregunta sobre eBPF), lo reconoció sin dudar y explicó cómo
+  lo abordaría para aprenderlo. Actitud segura pero no arrogante.
+
+  Habló con entusiasmo genuino sobre su experiencia mentoreando. Citó
+  ejemplos concretos y medibles de su impacto en el equipo junior.
+
+SECCIÓN 3 — CULTURA Y FIT DE EQUIPO
+--------------------------------------------------------------------------------
+  Muy positivo. Preguntó sobre la cultura de feedback del equipo, sobre
+  cómo se toman decisiones técnicas y sobre oportunidades de crecimiento.
+  Mencionó que prioriza equipos donde pueda tanto aprender como enseñar.
+
+  Sin señales de alerta. Colaborativa y directa.
+
+SECCIÓN 4 — EXPECTATIVAS
+--------------------------------------------------------------------------------
+  Renta esperada: $2.800.000 CLP líquidos
+  Disponibilidad: 30 días (aviso previo en empresa actual)
+  Modalidad:      Híbrido (3 días oficina / 2 remoto)
+
+================================================================================
+RECOMENDACIÓN FINAL
+================================================================================
+✅ AVANZAR — Altamente recomendada para oferta
+
+Candidata destacada del proceso. Perfil técnico sobresaliente combinado con
+habilidades de liderazgo y comunicación poco comunes. Recomendada para
+segunda ronda con el CTO y una oferta competitiva.
+
+Entrevistador: Carlos Mendoza
+Firma digital:  cmendoza@empresa.cl — 2025-03-10
