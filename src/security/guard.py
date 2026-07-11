@@ -41,6 +41,7 @@ class InputGuard:
 
     # Patrones de prompt injection (IL3.3 del curso)
     INJECTION_PATTERNS = [
+        # Inglés
         r"ignore\s+(previous|all|prior)\s+instructions",
         r"forget\s+everything\s+(above|before|prior)",
         r"act\s+as\s+if\s+you\s+are",
@@ -51,6 +52,19 @@ class InputGuard:
         r"jailbreak",
         r"DAN\s+mode",
         r"developer\s+mode",
+        # Español
+        r"ignora\s+(todas?\s+)?(tus|las|mis|sus)\s+instrucciones",
+        r"olvida\s+(todo|todas?\s+las\s+instrucciones|lo\s+anterior)",
+        r"act[úu]a\s+como\s+si\s+(fueras|eres|no\s+tuvieras)",
+        r"h[aá]z(te|)\s+pasar\s+por",
+        r"eres\s+ahora\s+un",
+        r"nuevas?\s+instrucciones\s*:",
+        r"desde\s+ahora\s+(eres|ser[aá]s|act[úu]a)",
+        r"sistema\s*:\s*(ahora|eres|act[úu]a)",
+        r"omite\s+(tus|las)\s+(instrucciones|restricciones|reglas)",
+        r"sin\s+(restricciones|l[íi]mites|filtros|reglas)",
+        r"modo\s+(desarrollador|sin\s+restricciones|libre|hack)",
+        r"supera\s+(tus|las)\s+(instrucciones|restricciones)",
     ]
 
     # Contenido inapropiado para un sistema de RRHH (IL3.3)

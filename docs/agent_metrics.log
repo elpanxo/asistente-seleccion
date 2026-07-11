@@ -39,3 +39,107 @@
 2026-07-02 01:58:16,688 [ERROR] Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
 2026-07-02 01:58:16,693 [ERROR] Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
 2026-07-02 01:58:16,696 [ERROR] Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+2026-07-02 02:04:18,678 [ERROR] Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+2026-07-02 02:04:26,733 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-02 02:04:35,820 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-02 02:05:03,538 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-02 02:05:12,626 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-02 02:05:20,131 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-02 02:05:29,761 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-02 02:05:36,715 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-02 02:05:48,519 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-02 02:05:56,434 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-02 02:06:06,271 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-02 02:06:16,448 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 11:58:53,227 [INFO] Loading SentenceTransformer model from sentence-transformers/all-MiniLM-L6-v2.
+2026-07-04 11:58:53,227 [INFO] Loading SentenceTransformer model from sentence-transformers/all-MiniLM-L6-v2.
+2026-07-04 11:59:00,894 [INFO] Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-07-04 11:59:01,549 [ERROR] Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-07-04 11:59:01,563 [ERROR] Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-07-04 11:59:02,279 [ERROR] Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-07-04 11:59:02,284 [ERROR] Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-07-04 11:59:02,288 [ERROR] Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+2026-07-04 12:01:53,440 [ERROR] Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+2026-07-04 12:02:00,458 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:02:07,586 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:02:33,079 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:02:40,695 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:03:26,011 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:03:33,281 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:03:40,184 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:03:47,142 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:03:50,996 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-07-04 12:03:50,997 [INFO] Retrying request to /chat/completions in 60.000000 seconds
+2026-07-04 12:05:18,328 [INFO] Loading SentenceTransformer model from sentence-transformers/all-MiniLM-L6-v2.
+2026-07-04 12:05:22,094 [INFO] Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-07-04 12:05:22,553 [ERROR] Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-07-04 12:05:22,566 [ERROR] Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-07-04 12:05:22,576 [ERROR] Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+2026-07-04 12:05:49,145 [ERROR] Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+2026-07-04 12:05:55,646 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:06:03,090 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:07:25,837 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:07:30,743 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:07:31,984 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:07:33,422 [INFO] [Búsqueda de información] duration=12211.1ms tool=buscar_candidatos candidate=- success=True total_interactions=1
+2026-07-04 12:07:33,427 [INFO] [Búsqueda de información] duration=12216.2ms tool=buscar_candidatos candidate=- success=True total_interactions=1
+2026-07-04 12:08:11,402 [INFO] Métricas de sesión reiniciadas.
+2026-07-04 12:16:46,727 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:16:47,173 [INFO] [Búsqueda de información] duration=4550.0ms tool=buscar_candidatos candidate=- success=True total_interactions=2
+2026-07-04 12:16:47,175 [INFO] [Búsqueda de información] duration=4551.0ms tool=buscar_candidatos candidate=- success=True total_interactions=1
+2026-07-04 12:17:10,586 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:17:11,465 [INFO] [Búsqueda de información] duration=4555.2ms tool=buscar_candidatos candidate=- success=True total_interactions=3
+2026-07-04 12:17:11,469 [INFO] [Búsqueda de información] duration=4559.3ms tool=buscar_candidatos candidate=- success=True total_interactions=2
+2026-07-04 12:27:31,765 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:27:35,865 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:27:36,691 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:27:37,054 [INFO] [Búsqueda de información] duration=9541.1ms tool=buscar_candidatos candidate=- success=True total_interactions=4
+2026-07-04 12:27:37,057 [INFO] [Búsqueda de información] duration=9543.5ms tool=buscar_candidatos candidate=- success=True total_interactions=3
+2026-07-04 12:29:23,620 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:29:24,366 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:29:26,736 [INFO] [Búsqueda de información] duration=7109.6ms tool=buscar_candidatos candidate=- success=True total_interactions=5
+2026-07-04 12:29:26,741 [INFO] [Búsqueda de información] duration=7114.5ms tool=buscar_candidatos candidate=- success=True total_interactions=4
+2026-07-04 12:29:42,494 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-04 12:29:43,045 [INFO] [Búsqueda de información] duration=4392.4ms tool=buscar_candidatos candidate=- success=True total_interactions=6
+2026-07-04 12:29:43,046 [INFO] [Búsqueda de información] duration=4392.4ms tool=buscar_candidatos candidate=- success=True total_interactions=5
+2026-07-11 00:19:52,889 [INFO] Loading SentenceTransformer model from sentence-transformers/all-MiniLM-L6-v2.
+2026-07-11 00:19:57,198 [INFO] Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-07-11 00:19:58,105 [ERROR] Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:19:58,118 [ERROR] Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:19:58,123 [ERROR] Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:20:35,058 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-11 00:20:35,479 [INFO] [Búsqueda de información] duration=7257.7ms tool=buscar_candidatos candidate=- success=True total_interactions=1
+2026-07-11 00:20:35,483 [INFO] [Búsqueda de información] duration=7264.8ms tool=buscar_candidatos candidate=- success=True total_interactions=1
+2026-07-11 00:25:14,868 [INFO] Loading SentenceTransformer model from sentence-transformers/all-MiniLM-L6-v2.
+2026-07-11 00:25:18,562 [INFO] Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-07-11 00:25:19,303 [ERROR] Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:25:19,323 [ERROR] Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:25:19,329 [ERROR] Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:26:01,045 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 400 Bad Request"
+2026-07-11 00:28:03,231 [INFO] Loading SentenceTransformer model from sentence-transformers/all-MiniLM-L6-v2.
+2026-07-11 00:28:06,895 [INFO] Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-07-11 00:28:07,335 [ERROR] Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:28:07,340 [ERROR] Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:28:07,345 [ERROR] Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:28:25,491 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-11 00:28:26,042 [ERROR] Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:28:31,549 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-11 00:28:32,729 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-11 00:28:34,272 [INFO] [Búsqueda de información] duration=14841.1ms tool=buscar_candidatos candidate=- success=True total_interactions=1
+2026-07-11 00:28:34,275 [INFO] [Búsqueda de información] duration=14849.0ms tool=buscar_candidatos candidate=- success=True total_interactions=1
+2026-07-11 00:29:06,319 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-11 00:29:07,131 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-11 00:29:09,827 [INFO] [Búsqueda de información] duration=7496.8ms tool=buscar_candidatos candidate=- success=True total_interactions=2
+2026-07-11 00:29:09,829 [INFO] [Búsqueda de información] duration=7503.8ms tool=buscar_candidatos candidate=- success=True total_interactions=2
+2026-07-11 00:30:50,022 [INFO] Loading SentenceTransformer model from sentence-transformers/all-MiniLM-L6-v2.
+2026-07-11 00:30:53,402 [INFO] Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2026-07-11 00:30:53,793 [ERROR] Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:30:53,798 [ERROR] Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:30:53,804 [ERROR] Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:31:08,812 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-11 00:31:09,053 [ERROR] Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+2026-07-11 00:31:16,714 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-11 00:31:18,204 [INFO] HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2026-07-11 00:31:19,668 [INFO] [Búsqueda de información] duration=16207.6ms tool=buscar_candidatos candidate=- success=True total_interactions=1
+2026-07-11 00:31:19,671 [INFO] [Búsqueda de información] duration=16218.6ms tool=buscar_candidatos candidate=- success=True total_interactions=1
+2026-07-11 00:31:32,777 [ERROR] [security_block] duration=0.0ms tool=- candidate=- success=False total_interactions=2

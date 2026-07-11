@@ -212,10 +212,13 @@ window.addEventListener("load", function() {
 
 # ── Estado de sesión ──────────────────────────────────────────────────────────
 def init_session():
+    from src.observability.metrics import AgentMetrics
     defaults = {
-        "vectorstore": None,
-        "chat_history": [],
-        "job_title": "Desarrollador/a Backend Senior",
+        "vectorstore":       None,
+        "chat_history":      [],
+        "chat_pending":      None,
+        "agent_metrics":     AgentMetrics(),   # persiste en session_state
+        "job_title":         "Desarrollador/a Backend Senior",
         "job_description": (
             "Buscamos un/a Desarrollador/a Backend Senior con experiencia en Python, "
             "APIs REST, bases de datos y trabajo en equipo ágil. "
@@ -362,6 +365,7 @@ section[data-testid="stSidebarCollapsedControl"] { display: none !important; }
 """, unsafe_allow_html=True)
 
 # Forzar apertura del sidebar via JS
+st.components.v1.iframe("about:blank", height=0, scrolling=False)
 st.components.v1.html("""
 <script>
 (function forceSidebar() {
@@ -529,16 +533,83 @@ with tab_chat:
 
         # ── Procesar mensaje pendiente (sugerencias) o input manual ───────
         def process_message(user_input: str):
+            import time as _t
+            from src.security.guard import input_guard as _ig
+
             st.session_state.chat_history.append({"role": "user", "content": user_input})
+
+            # Verificar seguridad ANTES de llamar al agente
+            _start = _t.time()
+            _clean, _is_safe, _reason = _ig.sanitize(user_input)
+
+            if not _is_safe:
+                # Registrar error de seguridad en métricas
+                _duration = _t.time() - _start
+                st.session_state.agent_metrics.record_interaction(
+                    operation="security_block",
+                    duration=_duration,
+                    success=False,
+                    tool_used=None,
+                )
+                st.session_state.chat_history.append({
+                    "role":    "assistant",
+                    "content": f"⚠️ {_reason}",
+                    "plan":    {}, "steps": [], "memory_used": False,
+                })
+                return
+
             with st.spinner("El agente está razonando..."):
-                result = run_agent(user_input, ids)
-            st.session_state.chat_history.append({
-                "role":        "assistant",
-                "content":     result["output"],
-                "plan":        result.get("plan", {}),
-                "steps":       result.get("steps", []),
-                "memory_used": result.get("memory_used", False),
-            })
+                try:
+                    result = run_agent(user_input, ids)
+                    _duration = _t.time() - _start
+
+                    plan    = result.get("plan", {})
+                    tool    = plan.get("herramientas", "").split(" → ")[0] if plan else None
+                    success = not result.get("blocked_by_security", False) and not result.get("blocked_by_rate_limit", False)
+                    st.session_state.agent_metrics.record_interaction(
+                        operation=plan.get("tipo_tarea", "chat") if plan else "chat",
+                        duration=_duration,
+                        success=success,
+                        tool_used=tool,
+                    )
+                    st.session_state.chat_history.append({
+                        "role":        "assistant",
+                        "content":     result["output"],
+                        "plan":        plan,
+                        "steps":       result.get("steps", []),
+                        "memory_used": result.get("memory_used", False),
+                    })
+
+                except Exception as _err:
+                    _duration = _t.time() - _start
+                    err_str = str(_err)
+
+                    # Detectar tipo de error para mensaje apropiado
+                    if "content_filter" in err_str or "jailbreak" in err_str or "ResponsibleAI" in err_str:
+                        msg = "🔒 El sistema de seguridad de la API detectó contenido no permitido y bloqueó la solicitud. Este tipo de consulta no puede ser procesada."
+                        op  = "security_block_api"
+                    elif "429" in err_str or "rate" in err_str.lower():
+                        msg = "⏳ Se alcanzó el límite de solicitudes. Espera unos segundos e intenta de nuevo."
+                        op  = "rate_limit_error"
+                    elif "401" in err_str or "auth" in err_str.lower():
+                        msg = "🔑 Error de autenticación. Verifica que el token de GitHub sea válido."
+                        op  = "auth_error"
+                    else:
+                        msg = f"⚠️ Error inesperado al procesar la consulta. El sistema lo registró para su revisión."
+                        op  = "unexpected_error"
+
+                    # Registrar como error en métricas
+                    st.session_state.agent_metrics.record_interaction(
+                        operation=op,
+                        duration=_duration,
+                        success=False,
+                        tool_used=None,
+                    )
+                    st.session_state.chat_history.append({
+                        "role":    "assistant",
+                        "content": msg,
+                        "plan":    {}, "steps": [], "memory_used": False,
+                    })
 
         # Procesar sugerencia pendiente
         if st.session_state.chat_pending:
@@ -754,7 +825,7 @@ with tab_audit:
 with tab_obs:
     st.markdown("### 📊 Métricas de Rendimiento")
 
-    summary = session_metrics.get_summary()
+    summary = st.session_state.agent_metrics.get_summary()
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -775,7 +846,7 @@ with tab_obs:
         st.metric("Uptime sesión", f"{summary['session_uptime_sec']} s")
 
     # Herramientas más usadas
-    top_tools = session_metrics.get_top_tools()
+    top_tools = st.session_state.agent_metrics.get_top_tools()
     if top_tools:
         st.markdown(
             "<div style='font-size:0.7rem;color:#555;text-transform:uppercase;"
@@ -795,7 +866,7 @@ with tab_obs:
             )
 
     # Historial de interacciones
-    history = session_metrics.get_history(10)
+    history = st.session_state.agent_metrics.get_history(10)
     if history:
         with st.expander("Historial de interacciones (últimas 10)"):
             for h in reversed(history):
@@ -811,7 +882,7 @@ with tab_obs:
                 )
 
     if st.button("Reiniciar métricas de sesión", key="reset_metrics"):
-        session_metrics.reset()
+        st.session_state.agent_metrics.reset()
         st.success("Métricas reiniciadas.")
         st.rerun()
 
